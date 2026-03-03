@@ -1,0 +1,12 @@
+<map id="npcap_transmitter.h" name="npcap_transmitter.h">
+<area shape="rect" id="Node000001" title="Npcap Network Transmitter Module." alt="" coords="194,5,330,32"/>
+<area shape="rect" id="Node000002" href="$npcap__transmitter__impl_8cc.html" title="Npcap Network Transmitter." alt="" coords="5,80,180,107"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="217,40,123,82,121,77,220,37"/>
+<area shape="rect" id="Node000003" href="$sv__controller_8cc.html" title="Implementation of SharedBuffer + SvController + Multi&#45;Publisher FFI." alt="" coords="205,155,318,181"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="253,45,244,80,244,100,247,120,258,156,253,153,242,122,239,101,239,80,249,49"/>
+<area shape="rect" id="Node000004" href="$sv__controller_8h.html" title="Main Controller + SharedBuffer for Multi&#45;Publisher SV System." alt="" coords="254,80,360,107"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="279,43,302,80,297,79,277,48"/>
+<area shape="rect" id="Node000005" href="$sv__native__refactored_8cc.html" title="SV Publisher &#45; Main Entry Point for Tauri FFI." alt="" coords="384,80,545,107"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="312,35,432,79,426,80,311,40"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="293,119,271,156,268,152,289,121"/>
+</map>

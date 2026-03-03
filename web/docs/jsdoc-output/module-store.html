@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Module: store</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Module: store</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>This module implements a Redux/MobX-inspired centralized state management system
+that serves as the <strong>Single Source of Truth</strong> for the entire SV Publisher application.
+All UI components subscribe to this store and automatically update when state changes.</p>
+<p><strong>Store Architecture:</strong></p>
+<pre><code>+------------------+
+|   Store Object   |
++------------------+
+| config: {}       |  --&gt; Settings (user configuration)
+| data: {}         |  --&gt; Runtime (channels, stats, publishing)
+| subscribers: Map |  --&gt; Path-based callbacks
++------------------+
+       |
+       v
+Components subscribe to paths and receive updates
+</code></pre>
+<p><strong>State Structure:</strong></p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>config</td>
+<td>standard</td>
+<td>string</td>
+<td>IEC standard ID ('9-2LE', '9-2', '61869')</td>
+</tr>
+<tr>
+<td>config</td>
+<td>standardConfig</td>
+<td>Object</td>
+<td>Full standard configuration</td>
+</tr>
+<tr>
+<td>config</td>
+<td>frequency</td>
+<td>number</td>
+<td>System frequency (50/60 Hz)</td>
+</tr>
+<tr>
+<td>config</td>
+<td>samplesPerCycle</td>
+<td>number</td>
+<td>Samples per power cycle</td>
+</tr>
+<tr>
+<td>config</td>
+<td>sampleRate</td>
+<td>number</td>
+<td>Computed: samplesPerCycle × frequency</td>
+</tr>
+<tr>
+<td>config</td>
+<td>noASDU</td>
+<td>number</td>
+<td>ASDUs per Ethernet frame</td>
+</tr>
+<tr>
+<td>config</td>
+<td>srcMAC</td>
+<td>string</td>
+<td>Source MAC address</td>
+</tr>
+<tr>
+<td>config</td>
+<td>dstMAC</td>
+<td>string</td>
+<td>Destination MAC address</td>
+</tr>
+<tr>
+<td>config</td>
+<td>svID</td>
+<td>string</td>
+<td>SV identifier</td>
+</tr>
+<tr>
+<td>config</td>
+<td>appID</td>
+<td>number</td>
+<td>Application ID</td>
+</tr>
+<tr>
+<td>data</td>
+<td>channels</td>
+<td>Array</td>
+<td>Active channel configurations</td>
+</tr>
+<tr>
+<td>data</td>
+<td>pcap</td>
+<td>Object</td>
+<td>PCAP file state</td>
+</tr>
+<tr>
+<td>data</td>
+<td>publishing</td>
+<td>Object</td>
+<td>Publishing state</td>
+</tr>
+<tr>
+<td>data</td>
+<td>stats</td>
+<td>Object</td>
+<td>Runtime statistics</td>
+</tr>
+<tr>
+<td>data</td>
+<td>connection</td>
+<td>Object</td>
+<td>Backend connection state</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Data Flow:</strong></p>
+<ol>
+<li>User interacts with Component</li>
+<li>Component calls store.setConfig({key: value})</li>
+<li>Store validates and updates state</li>
+<li>Store notifies all subscribers for changed paths</li>
+<li>Subscriber callbacks re-render UI</li>
+</ol>
+<p><strong>Security:</strong></p>
+<ul>
+<li>All input values validated before storage</li>
+<li>Channel equations are parsed, not eval'd</li>
+<li>MAC addresses are format-validated</li>
+<li>Numeric values have range checks</li>
+</ul></div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-version">Version:</dt>
+    <dd class="tag-version"><ul class="dummy"><li>1.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>SV-PUB Team</li>
+        </ul>
+    </dd>
+    
+
+    
+    <dt class="tag-copyright">Copyright:</dt>
+    <dd class="tag-copyright"><ul class="dummy"><li>2025 SV Publisher</li></ul></dd>
+    
+
+    
+    <dt class="tag-license">License:</dt>
+    <dd class="tag-license"><ul class="dummy"><li>Proprietary</li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js_store_index.js.html">js/store/index.js</a>, <a href="js_store_index.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="module-components.html"><code>module:components</code></a> for UI component integration</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Examples</h5>
+    
+        <p class="code-caption">Basic Usage</p>
+    
+    <pre class="prettyprint"><code>import store from './store/index.js';// Get current valueconst freq = store.get('config.frequency'); // 60// Update configurationstore.setConfig({ frequency: 50 });// Subscribe to changesconst unsubscribe = store.subscribe('config.frequency', (newValue) => {    console.log('Frequency changed to:', newValue);});</code></pre>
+
+        <p class="code-caption">Batch Updates</p>
+    
+    <pre class="prettyprint"><code>// Multiple updates in single notificationstore.batch(() => {    store.setConfig({ frequency: 50 });    store.setConfig({ samplesPerCycle: 80 });});</code></pre>
+
+        <p class="code-caption">Channel Management</p>
+    
+    <pre class="prettyprint"><code>// Get all channelsconst channels = store.data.channels;// Update channel equationstore.updateChannelEquation('Va', '325 * sin(2 * PI * 50 * t)');</code></pre>
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+        <h3 class="subsection-title">Requires</h3>
+
+        <ul>
+            <li>module:shared/standards.js</li>
+        </ul>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="~initialConfig"><span class="type-signature">(inner, constant) </span>initialConfig<span class="type-signature"> :Object</span></h4>
+
+
+
+
+<div class="description">
+    <p>Initial configuration state</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>standard</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Selected IEC standard identifier</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>standardConfig</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Full standard configuration from STANDARDS</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>frequency</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>System frequency in Hz (50 or 60)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>samplesPerCycle</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Number of samples per power cycle</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sampleRate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Computed sample rate (samplesPerCycle × frequency)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>noASDU</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Number of ASDUs per Ethernet frame</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>srcMAC</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Source MAC address (XX:XX:XX:XX:XX:XX format)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dstMAC</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Destination MAC address (multicast for SV)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vlanID</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>VLAN identifier (0 = no VLAN)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vlanPriority</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>IEEE 802.1Q priority (0-7)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>interfaceIndex</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Selected network interface index</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>interfaceName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Selected network interface name</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>svID</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Sampled Values identifier (1-65 chars)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>appID</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Application ID (0x0000-0x3FFF)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>confRev</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Configuration revision number</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>smpSynch</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Sample synchronization flag (0=none, 1=local, 2=global)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>selectedChannels</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Ordered list of channel IDs for ASDU</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js_store_index.js.html">js/store/index.js</a>, <a href="js_store_index.js.html#line122">line 122</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~buildInitialChannels"><span class="type-signature">(inner) </span>buildInitialChannels<span class="signature">(standardId)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Build initial channels array from BASE_CHANNELS and DEFAULT_EQUATIONS</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>standardId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    9-2LE
+                
+                </td>
+            
+
+            <td class="description last"><p>Standard ID to get channel order</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js_store_index.js.html">js/store/index.js</a>, <a href="js_store_index.js.html#line159">line 159</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Array of channel objects</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-FrameViewer.html">FrameViewer</a></li><li><a href="module-app.html">app</a></li><li><a href="module-bindings.html">bindings</a></li><li><a href="module-components.html">components</a></li><li><a href="module-configManager.html">configManager</a></li><li><a href="module-copyFilter.html">copyFilter</a></li><li><a href="module-dragManager.html">dragManager</a></li><li><a href="module-embeddedMathEditor.html">embeddedMathEditor</a></li><li><a href="module-equationTemplates.html">equationTemplates</a></li><li><a href="module-expressionConverter.html">expressionConverter</a></li><li><a href="module-formatters.html">formatters</a></li><li><a href="module-keyboardShortcuts.html">keyboardShortcuts</a></li><li><a href="module-mathEvaluator.html">mathEvaluator</a></li><li><a href="module-mathLiveEditor.html">mathLiveEditor</a></li><li><a href="module-standards.html">standards</a></li><li><a href="module-store.html">store</a></li><li><a href="module-tauriClient.html">tauriClient</a></li><li><a href="module-toast.html">toast</a></li><li><a href="module-validators.html">validators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_copyFilter">_copyFilter</a></li><li><a href="global.html#_getDurationSettings">_getDurationSettings</a></li><li><a href="global.html#_hideTimerDisplay">_hideTimerDisplay</a></li><li><a href="global.html#_setupDragEvents">_setupDragEvents</a></li><li><a href="global.html#_showTimerDisplay">_showTimerDisplay</a></li><li><a href="global.html#_startStatusPolling">_startStatusPolling</a></li><li><a href="global.html#_stopStatusPolling">_stopStatusPolling</a></li><li><a href="global.html#_updateTimerText">_updateTimerText</a></li><li><a href="global.html#autoDetectMAC">autoDetectMAC</a></li><li><a href="global.html#bindEvents">bindEvents</a></li><li><a href="global.html#cacheElements">cacheElements</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#formatDuration">formatDuration</a></li><li><a href="global.html#formatNumber">formatNumber</a></li><li><a href="global.html#formatRate">formatRate</a></li><li><a href="global.html#getChannelsListHTML">getChannelsListHTML</a></li><li><a href="global.html#getDefaultColor">getDefaultColor</a></li><li><a href="global.html#handleQuickAdd">handleQuickAdd</a></li><li><a href="global.html#handleResetClick">handleResetClick</a></li><li><a href="global.html#handleStoreChange">handleStoreChange</a></li><li><a href="global.html#loadNetworkInterfaces">loadNetworkInterfaces</a></li><li><a href="global.html#rebuildSamplesPerCycleDropdown">rebuildSamplesPerCycleDropdown</a></li><li><a href="global.html#resetStatsDisplay">resetStatsDisplay</a></li><li><a href="global.html#setupStoreSubscriptions">setupStoreSubscriptions</a></li><li><a href="global.html#syncFromStore">syncFromStore</a></li><li><a href="global.html#syncToServer">syncToServer</a></li><li><a href="global.html#updateSampleRate">updateSampleRate</a></li><li><a href="global.html#updateStandard">updateStandard</a></li><li><a href="global.html#updateStatsDisplay">updateStatsDisplay</a></li><li><a href="global.html#validateMAC">validateMAC</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 05 2026 21:30:19 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

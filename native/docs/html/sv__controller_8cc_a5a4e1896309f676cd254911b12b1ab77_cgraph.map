@@ -1,0 +1,15 @@
+<map id="sv_mp_reset_all" name="sv_mp_reset_all">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,122,57"/>
+<area shape="rect" id="Node000002" href="$class_sv_controller.html#afc102679fe80499c39d27cb8640394cc" title=" " alt="" coords="170,5,320,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,33,157,30,152,33,123,38"/>
+<area shape="rect" id="Node000004" href="$class_sv_controller.html#ac173f4f124e0394b58014d7e3e41f78d" title=" " alt="" coords="172,56,318,83"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="122,49,159,56,154,58,122,55"/>
+<area shape="rect" id="Node000003" href="$class_sv_controller.html#aa5d7c635a8015c90217076cf4722542c" title=" " alt="" coords="368,5,541,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="320,16,355,18,350,19,321,21"/>
+<area shape="rect" id="Node000005" href="$sv__native__refactored_8cc.html#afc51a55f01e77fb4264498f176d9438e" title="Stop publishing." alt="" coords="381,56,528,83"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="318,67,368,69,363,70,318,72"/>
+<area shape="rect" id="Node000007" href="$sv__stats__impl_8cc.html#a4e5f02e3cc9b2b06496cca1b54582e0a" title="Reset all statistics to zero." alt="" coords="390,107,519,133"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="304,81,384,102,379,103,303,86"/>
+<area shape="rect" id="Node000006" href="$sv__native__refactored_8cc.html#a24b2107199112b58a421c0c873ea7d12" title=" " alt="" coords="589,56,715,83"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="528,67,576,69,571,70,529,72"/>
+</map>

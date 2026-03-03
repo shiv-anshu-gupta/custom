@@ -1,0 +1,9 @@
+<map id="npcap_get_sample_frame" name="npcap_get_sample_frame">
+<area shape="rect" id="Node000001" title="Get a sample frame with current configuration Returns the actual encoded frame bytes that would be tr..." alt="" coords="5,56,176,83"/>
+<area shape="rect" id="Node000002" href="$sv__native__refactored_8cc.html#a081cf319776daba5ec14c60bec132d64" title=" " alt="" coords="259,5,372,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,53,246,33,241,36,154,58"/>
+<area shape="rect" id="Node000003" href="$sv__encoder__impl_8cc.html#a58f4a492f4c37293fdfcc0401b72abd1" title="Encode a single SV packet." alt="" coords="224,56,407,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="175,67,211,69,205,70,176,72"/>
+<area shape="rect" id="Node000004" href="$sv__encoder__impl_8cc.html#a3b78a24c9d83ba55bcd667b3b7fec64c" title="Set encoder configuration." alt="" coords="238,107,393,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="153,81,241,102,236,104,153,86"/>
+</map>

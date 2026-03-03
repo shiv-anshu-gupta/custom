@@ -1,0 +1,5 @@
+<map id="npcap_stats_session_start" name="npcap_stats_session_start">
+<area shape="rect" id="Node000001" title="Start a new statistics session." alt="" coords="5,5,150,48"/>
+<area shape="rect" id="Node000002" href="$sv__stats__impl_8cc.html#ae7cd346e20d4749f60fa7332dfae0dd7" title="Get current time in milliseconds." alt="" coords="198,13,372,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,24,185,26,179,27,150,29"/>
+</map>

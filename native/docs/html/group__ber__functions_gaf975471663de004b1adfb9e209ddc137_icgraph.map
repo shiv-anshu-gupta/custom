@@ -1,0 +1,5 @@
+<map id="ber_encode_unsigned" name="ber_encode_unsigned">
+<area shape="rect" id="Node000001" title="Encode an unsigned integer." alt="" coords="187,5,334,32"/>
+<area shape="rect" id="Node000002" href="$group__ber__functions.html#ga7cdf29a8107215d38dc986e0f952020b" title="Encode a signed integer." alt="" coords="5,5,139,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,19,139,21,139,16,174,18"/>
+</map>

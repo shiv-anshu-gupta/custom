@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: js/plugins/configManager.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: js/plugins/configManager.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file configManager.js
+ * @fileoverview Configuration Save/Load Plugin
+ * @module configManager
+ * @author SV-PUB Team
+ * @description
+ * Provides configuration persistence - save to JSON file, load from JSON file.
+ * 
+ * **Features:**
+ * - Export current config to JSON file
+ * - Import config from JSON file
+ * - Apply config to UI elements
+ * 
+ * @example
+ * import { initConfigButtons, saveConfig, loadConfig } from './plugins/configManager.js';
+ * initConfigButtons(); // Setup save/load button handlers
+ */
+
+import { showToast } from './toast.js';
+import { formatDateForFilename } from '../utils/formatters.js';
+import { updatePreview } from '../components/preview.js';
+
+/**
+ * Initialize config save/load buttons
+ * @memberof module:configManager
+ */
+export function initConfigButtons() {
+    const saveBtn = document.getElementById('saveConfigBtn');
+    const loadBtn = document.getElementById('loadConfigBtn');
+
+    if (saveBtn) saveBtn.addEventListener('click', saveConfig);
+    if (loadBtn) loadBtn.addEventListener('click', loadConfig);
+}
+
+/**
+ * Save current configuration to a JSON file
+ * @memberof module:configManager
+ */
+export function saveConfig() {
+    // Gather all configuration values
+    const config = {
+        // Standard
+        standard: document.querySelector('input[name="standard"]:checked')?.value,
+
+        // Network Settings
+        srcMac: document.getElementById('srcMac').value,
+        destMac: document.getElementById('destMac').value,
+        appId: document.getElementById('appId').value,
+        vlanId: document.getElementById('vlanId').value,
+
+        // SV Parameters
+        svId: document.getElementById('svId').value,
+        datSet: document.getElementById('datSet').value,
+        frequency: document.getElementById('frequency').value,
+        smpRate: document.getElementById('smpRate').value,
+        confRev: document.getElementById('confRev').value,
+        smpSynch: document.getElementById('smpSynch').value,
+
+        // Equations
+        equations: {
+            Va: document.getElementById('eqVa').value,
+            Vb: document.getElementById('eqVb').value,
+            Vc: document.getElementById('eqVc').value,
+            Vn: document.getElementById('eqVn').value,
+            Ia: document.getElementById('eqIa').value,
+            Ib: document.getElementById('eqIb').value,
+            Ic: document.getElementById('eqIc').value,
+            In: document.getElementById('eqIn').value
+        },
+
+        // Playback options
+        loopPlayback: document.getElementById('loopPlayback')?.checked,
+        playbackSpeed: document.getElementById('playbackSpeed')?.value,
+
+        // Metadata
+        savedAt: new Date().toISOString(),
+        version: '1.0'
+    };
+
+    // Convert to JSON
+    const configJson = JSON.stringify(config, null, 2);
+
+    // Create download
+    const blob = new Blob([configJson], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sv-publisher-config-' + formatDateForFilename() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast('Configuration saved to file');
+}
+
+/**
+ * Load configuration from a JSON file
+ * @memberof module:configManager
+ */
+export function loadConfig() {
+    // Create file input
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json';
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+            try {
+                const config = JSON.parse(event.target.result);
+                applyConfig(config);
+                showToast('Configuration loaded: ' + file.name);
+            } catch (error) {
+                showToast('Invalid configuration file', 'error');
+                console.error('Config load error:', error);
+            }
+        };
+
+        reader.readAsText(file);
+    });
+
+    fileInput.click();
+}
+
+/**
+ * Apply configuration object to form inputs
+ * @memberof module:configManager
+ * @param {Object} config - Configuration object
+ */
+export function applyConfig(config) {
+    // Apply Standard
+    if (config.standard) {
+        const radioCards = document.querySelectorAll('.radio-card');
+        radioCards.forEach(function(card) {
+            const radio = card.querySelector('input[type="radio"]');
+            if (radio.value === config.standard) {
+                radioCards.forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                radio.checked = true;
+            }
+        });
+    }
+
+    // Apply Network Settings
+    if (config.srcMac) document.getElementById('srcMac').value = config.srcMac;
+    if (config.destMac) document.getElementById('destMac').value = config.destMac;
+    if (config.appId) document.getElementById('appId').value = config.appId;
+    if (config.vlanId) document.getElementById('vlanId').value = config.vlanId;
+
+    // Apply SV Parameters
+    if (config.svId) document.getElementById('svId').value = config.svId;
+    if (config.datSet) document.getElementById('datSet').value = config.datSet;
+    if (config.frequency) document.getElementById('frequency').value = config.frequency;
+    if (config.smpRate) document.getElementById('smpRate').value = config.smpRate;
+    if (config.confRev) document.getElementById('confRev').value = config.confRev;
+    if (config.smpSynch) document.getElementById('smpSynch').value = config.smpSynch;
+
+    // Apply Equations
+    if (config.equations) {
+        if (config.equations.Va) document.getElementById('eqVa').value = config.equations.Va;
+        if (config.equations.Vb) document.getElementById('eqVb').value = config.equations.Vb;
+        if (config.equations.Vc) document.getElementById('eqVc').value = config.equations.Vc;
+        if (config.equations.Vn) document.getElementById('eqVn').value = config.equations.Vn;
+        if (config.equations.Ia) document.getElementById('eqIa').value = config.equations.Ia;
+        if (config.equations.Ib) document.getElementById('eqIb').value = config.equations.Ib;
+        if (config.equations.Ic) document.getElementById('eqIc').value = config.equations.Ic;
+        if (config.equations.In) document.getElementById('eqIn').value = config.equations.In;
+    }
+
+    // Apply Playback options
+    if (config.loopPlayback !== undefined) {
+        const loopEl = document.getElementById('loopPlayback');
+        if (loopEl) loopEl.checked = config.loopPlayback;
+    }
+    if (config.playbackSpeed) {
+        const speedEl = document.getElementById('playbackSpeed');
+        if (speedEl) speedEl.value = config.playbackSpeed;
+    }
+
+    // Update preview
+    updatePreview();
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-FrameViewer.html">FrameViewer</a></li><li><a href="module-app.html">app</a></li><li><a href="module-bindings.html">bindings</a></li><li><a href="module-components.html">components</a></li><li><a href="module-configManager.html">configManager</a></li><li><a href="module-copyFilter.html">copyFilter</a></li><li><a href="module-dragManager.html">dragManager</a></li><li><a href="module-embeddedMathEditor.html">embeddedMathEditor</a></li><li><a href="module-equationTemplates.html">equationTemplates</a></li><li><a href="module-expressionConverter.html">expressionConverter</a></li><li><a href="module-formatters.html">formatters</a></li><li><a href="module-keyboardShortcuts.html">keyboardShortcuts</a></li><li><a href="module-mathEvaluator.html">mathEvaluator</a></li><li><a href="module-mathLiveEditor.html">mathLiveEditor</a></li><li><a href="module-standards.html">standards</a></li><li><a href="module-store.html">store</a></li><li><a href="module-tauriClient.html">tauriClient</a></li><li><a href="module-toast.html">toast</a></li><li><a href="module-validators.html">validators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_copyFilter">_copyFilter</a></li><li><a href="global.html#_getDurationSettings">_getDurationSettings</a></li><li><a href="global.html#_hideTimerDisplay">_hideTimerDisplay</a></li><li><a href="global.html#_setupDragEvents">_setupDragEvents</a></li><li><a href="global.html#_showTimerDisplay">_showTimerDisplay</a></li><li><a href="global.html#_startStatusPolling">_startStatusPolling</a></li><li><a href="global.html#_stopStatusPolling">_stopStatusPolling</a></li><li><a href="global.html#_updateTimerText">_updateTimerText</a></li><li><a href="global.html#autoDetectMAC">autoDetectMAC</a></li><li><a href="global.html#bindEvents">bindEvents</a></li><li><a href="global.html#cacheElements">cacheElements</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#formatDuration">formatDuration</a></li><li><a href="global.html#formatNumber">formatNumber</a></li><li><a href="global.html#formatRate">formatRate</a></li><li><a href="global.html#getChannelsListHTML">getChannelsListHTML</a></li><li><a href="global.html#getDefaultColor">getDefaultColor</a></li><li><a href="global.html#handleQuickAdd">handleQuickAdd</a></li><li><a href="global.html#handleResetClick">handleResetClick</a></li><li><a href="global.html#handleStoreChange">handleStoreChange</a></li><li><a href="global.html#loadNetworkInterfaces">loadNetworkInterfaces</a></li><li><a href="global.html#rebuildSamplesPerCycleDropdown">rebuildSamplesPerCycleDropdown</a></li><li><a href="global.html#resetStatsDisplay">resetStatsDisplay</a></li><li><a href="global.html#setupStoreSubscriptions">setupStoreSubscriptions</a></li><li><a href="global.html#syncFromStore">syncFromStore</a></li><li><a href="global.html#syncToServer">syncToServer</a></li><li><a href="global.html#updateSampleRate">updateSampleRate</a></li><li><a href="global.html#updateStandard">updateStandard</a></li><li><a href="global.html#updateStatsDisplay">updateStatsDisplay</a></li><li><a href="global.html#validateMAC">validateMAC</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 05 2026 21:30:19 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

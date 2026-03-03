@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: js/utils/formatters.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: js/utils/formatters.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file formatters.js
+ * @fileoverview Formatting Utility Functions
+ * @module formatters
+ * @author SV-PUB Team
+ * @description
+ * Provides formatting utilities for time, dates, MAC addresses, and numbers.
+ * All functions are pure and have no side effects.
+ * 
+ * @example
+ * import { formatTime, formatNumber } from './utils/formatters.js';
+ * formatTime(3661); // "01:01:01"
+ * formatNumber(1234567); // "1,234,567"
+ */
+
+/**
+ * Format seconds into HH:MM:SS format
+ * @memberof module:formatters
+ * @param {number} totalSeconds - Total seconds to format
+ * @returns {string} Formatted time string
+ * @example
+ * formatTime(3661) // "01:01:01"
+ */
+export function formatTime(totalSeconds) {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = Math.floor(totalSeconds % 60);
+
+    return [
+        hours.toString().padStart(2, '0'),
+        minutes.toString().padStart(2, '0'),
+        seconds.toString().padStart(2, '0')
+    ].join(':');
+}
+
+/**
+ * Format current date for filename (YYYYMMDD-HHMM)
+ * @memberof module:formatters
+ * @returns {string} Formatted date string
+ * @example
+ * formatDateForFilename() // "20250205-1430"
+ */
+export function formatDateForFilename() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+
+    return `${year}${month}${day}-${hours}${minutes}`;
+}
+
+/**
+ * Generate a random MAC address
+ * @memberof module:formatters
+ * @returns {string} Random MAC address in XX:XX:XX:XX:XX:XX format
+ * @example
+ * generateRandomMac() // "A1:B2:C3:D4:E5:F6"
+ */
+export function generateRandomMac() {
+    const hexDigits = '0123456789ABCDEF';
+    let mac = '';
+
+    for (let i = 0; i &lt; 6; i++) {
+        if (i > 0) mac += ':';
+        mac += hexDigits[Math.floor(Math.random() * 16)];
+        mac += hexDigits[Math.floor(Math.random() * 16)];
+    }
+
+    return mac;
+}
+
+/**
+ * Format number with locale-specific thousand separators
+ * @memberof module:formatters
+ * @param {number} num - Number to format
+ * @returns {string} Formatted number string
+ * @example
+ * formatNumber(1234567) // "1,234,567"
+ */
+export function formatNumber(num) {
+    return num.toLocaleString();
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-FrameViewer.html">FrameViewer</a></li><li><a href="module-app.html">app</a></li><li><a href="module-bindings.html">bindings</a></li><li><a href="module-components.html">components</a></li><li><a href="module-configManager.html">configManager</a></li><li><a href="module-copyFilter.html">copyFilter</a></li><li><a href="module-dragManager.html">dragManager</a></li><li><a href="module-embeddedMathEditor.html">embeddedMathEditor</a></li><li><a href="module-equationTemplates.html">equationTemplates</a></li><li><a href="module-expressionConverter.html">expressionConverter</a></li><li><a href="module-formatters.html">formatters</a></li><li><a href="module-keyboardShortcuts.html">keyboardShortcuts</a></li><li><a href="module-mathEvaluator.html">mathEvaluator</a></li><li><a href="module-mathLiveEditor.html">mathLiveEditor</a></li><li><a href="module-standards.html">standards</a></li><li><a href="module-store.html">store</a></li><li><a href="module-tauriClient.html">tauriClient</a></li><li><a href="module-toast.html">toast</a></li><li><a href="module-validators.html">validators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_copyFilter">_copyFilter</a></li><li><a href="global.html#_getDurationSettings">_getDurationSettings</a></li><li><a href="global.html#_hideTimerDisplay">_hideTimerDisplay</a></li><li><a href="global.html#_setupDragEvents">_setupDragEvents</a></li><li><a href="global.html#_showTimerDisplay">_showTimerDisplay</a></li><li><a href="global.html#_startStatusPolling">_startStatusPolling</a></li><li><a href="global.html#_stopStatusPolling">_stopStatusPolling</a></li><li><a href="global.html#_updateTimerText">_updateTimerText</a></li><li><a href="global.html#autoDetectMAC">autoDetectMAC</a></li><li><a href="global.html#bindEvents">bindEvents</a></li><li><a href="global.html#cacheElements">cacheElements</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#formatDuration">formatDuration</a></li><li><a href="global.html#formatNumber">formatNumber</a></li><li><a href="global.html#formatRate">formatRate</a></li><li><a href="global.html#getChannelsListHTML">getChannelsListHTML</a></li><li><a href="global.html#getDefaultColor">getDefaultColor</a></li><li><a href="global.html#handleQuickAdd">handleQuickAdd</a></li><li><a href="global.html#handleResetClick">handleResetClick</a></li><li><a href="global.html#handleStoreChange">handleStoreChange</a></li><li><a href="global.html#loadNetworkInterfaces">loadNetworkInterfaces</a></li><li><a href="global.html#rebuildSamplesPerCycleDropdown">rebuildSamplesPerCycleDropdown</a></li><li><a href="global.html#resetStatsDisplay">resetStatsDisplay</a></li><li><a href="global.html#setupStoreSubscriptions">setupStoreSubscriptions</a></li><li><a href="global.html#syncFromStore">syncFromStore</a></li><li><a href="global.html#syncToServer">syncToServer</a></li><li><a href="global.html#updateSampleRate">updateSampleRate</a></li><li><a href="global.html#updateStandard">updateStandard</a></li><li><a href="global.html#updateStatsDisplay">updateStatsDisplay</a></li><li><a href="global.html#validateMAC">validateMAC</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 05 2026 21:30:19 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

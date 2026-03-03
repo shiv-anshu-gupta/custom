@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: js/components/Statistics.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: js/components/Statistics.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module Statistics
+ * @file components/Statistics.js
+ * @description Statistics Display Module for real-time network stats.
+ * Shows packets sent, data rate, errors, uptime, and sample counter.
+ * 
+ * @author SV-PUB Team
+ * @date 2025
+ */
+
+import store from '../store/index.js';
+import { showToast } from '../plugins/toast.js';
+import * as tauriClient from '../utils/tauriClient.js';
+
+// ============================================================================
+// MODULE STATE
+// ============================================================================
+
+let initialized = false;
+const elements = {};
+
+// ============================================================================
+// DOM TEMPLATE
+// ============================================================================
+
+/**
+ * Get the HTML template for statistics display
+ * @memberof module:Statistics
+ * @returns {string} HTML template string
+ */
+export function getTemplate() {
+    return `
+        &lt;section class="card" id="statistics-module">
+            &lt;div class="card-header">
+                &lt;h2>Statistics&lt;/h2>
+                &lt;button class="btn btn-small btn-outline" id="resetStatsBtn">Reset&lt;/button>
+            &lt;/div>
+            &lt;div class="card-body">
+                &lt;!-- Primary Stats Grid -->
+                &lt;div class="stats-grid">
+                    &lt;div class="stat-box">
+                        &lt;span class="stat-value" id="stat-packetsSent">0&lt;/span>
+                        &lt;span class="stat-label">Packets Sent&lt;/span>
+                    &lt;/div>
+                    &lt;div class="stat-box highlight">
+                        &lt;span class="stat-value" id="stat-dataRate">0 bps&lt;/span>
+                        &lt;span class="stat-label">Data Rate&lt;/span>
+                    &lt;/div>
+                    &lt;div class="stat-box">
+                        &lt;span class="stat-value" id="stat-pps">0&lt;/span>
+                        &lt;span class="stat-label">Packets/sec&lt;/span>
+                    &lt;/div>
+                    &lt;div class="stat-box">
+                        &lt;span class="stat-value" id="stat-duration">00:00:00&lt;/span>
+                        &lt;span class="stat-label">Duration&lt;/span>
+                    &lt;/div>
+                &lt;/div>
+
+                &lt;!-- Secondary Stats (Expanded Info) -->
+                &lt;div class="stats-details" id="statsDetails">
+                    &lt;div class="stats-row">
+                        &lt;span class="stats-label">Bytes Sent:&lt;/span>
+                        &lt;span class="stats-value" id="stat-bytesSent">0 B&lt;/span>
+                    &lt;/div>
+                    &lt;div class="stats-row">
+                        &lt;span class="stats-label">Peak Rate:&lt;/span>
+                        &lt;span class="stats-value" id="stat-peakRate">0 bps&lt;/span>
+                    &lt;/div>
+                    &lt;div class="stats-row">
+                        &lt;span class="stats-label">Avg Packet Size:&lt;/span>
+                        &lt;span class="stats-value" id="stat-avgPacketSize">0 B&lt;/span>
+                    &lt;/div>
+                    &lt;div class="stats-row">
+                        &lt;span class="stats-label">Failed Packets:&lt;/span>
+                        &lt;span class="stats-value" id="stat-packetsFailed">0&lt;/span>
+                    &lt;/div>
+                &lt;/div>
+
+                &lt;!-- Sample Counter Progress -->
+                &lt;div class="sample-counter">
+                    &lt;div class="counter-header">
+                        &lt;span>Sample Counter (smpCnt)&lt;/span>
+                        &lt;span id="stat-smpCntValue">0 / 4000&lt;/span>
+                    &lt;/div>
+                    &lt;div class="progress-bar">
+                        &lt;div class="progress-fill" id="stat-smpCntProgress">&lt;/div>
+                    &lt;/div>
+                &lt;/div>
+            &lt;/div>
+        &lt;/section>
+    `;
+}
+
+// ============================================================================
+// FORMATTING UTILITIES
+// ============================================================================
+
+/**
+ * Format bytes to human-readable string (B, KB, MB, GB)
+ * @param {number} bytes - Number of bytes
+ * @returns {string} Formatted string
+ */
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 B';
+    
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const k = 1024;
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    const value = bytes / Math.pow(k, i);
+    
+    return value.toFixed(i === 0 ? 0 : 2) + ' ' + units[i];
+}
+
+/**
+ * Format bits per second to human-readable rate
+ * Auto-scales: bps → Kbps → Mbps → Gbps
+ * @param {number} bps - Bits per second
+ * @returns {string} Formatted rate string
+ */
+function formatRate(bps) {
+    if (bps === 0) return '0 bps';
+    
+    if (bps >= 1e9) {
+        return (bps / 1e9).toFixed(2) + ' Gbps';
+    } else if (bps >= 1e6) {
+        return (bps / 1e6).toFixed(2) + ' Mbps';
+    } else if (bps >= 1e3) {
+        return (bps / 1e3).toFixed(2) + ' Kbps';
+    }
+    return bps.toFixed(0) + ' bps';
+}
+
+/**
+ * Format duration in seconds to HH:MM:SS
+ * @param {number} seconds - Duration in seconds
+ * @returns {string} Formatted time string
+ */
+function formatDuration(seconds) {
+    // Round to nearest second for better UX (7.9s shows as 8s, not 7s)
+    const totalSeconds = Math.round(seconds);
+    const hrs = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+    
+    return [hrs, mins, secs]
+        .map(v => v.toString().padStart(2, '0'))
+        .join(':');
+}
+
+/**
+ * Format large numbers with commas
+ * @param {number} num - Number to format
+ * @returns {string} Formatted number string
+ */
+function formatNumber(num) {
+    return num.toLocaleString();
+}
+
+// ============================================================================
+// DOM OPERATIONS
+// ============================================================================
+
+/**
+ * Cache all DOM element references
+ */
+function cacheElements() {
+    elements.container = document.getElementById('statistics-module');
+    elements.resetBtn = document.getElementById('resetStatsBtn');
+    elements.statsDetails = document.getElementById('statsDetails');
+    
+    // Primary stats
+    elements.packetsSent = document.getElementById('stat-packetsSent');
+    elements.dataRate = document.getElementById('stat-dataRate');
+    elements.pps = document.getElementById('stat-pps');
+    elements.duration = document.getElementById('stat-duration');
+    
+    // Secondary stats
+    elements.bytesSent = document.getElementById('stat-bytesSent');
+    elements.peakRate = document.getElementById('stat-peakRate');
+    elements.avgPacketSize = document.getElementById('stat-avgPacketSize');
+    elements.packetsFailed = document.getElementById('stat-packetsFailed');
+    
+    // Sample counter
+    elements.smpCntValue = document.getElementById('stat-smpCntValue');
+    elements.smpCntProgress = document.getElementById('stat-smpCntProgress');
+}
+
+/**
+ * Update all stats display elements
+ * @param {Object} stats - Statistics object from server
+ */
+function updateStatsDisplay(stats) {
+    if (!elements.container) return;
+    
+    // Primary stats
+    if (stats.packetsSent !== undefined &amp;&amp; elements.packetsSent) {
+        elements.packetsSent.textContent = formatNumber(stats.packetsSent);
+    }
+    
+    // Data rate - prefer native formatted rate or calculate from bps
+    if (elements.dataRate) {
+        if (stats.rateFormatted) {
+            elements.dataRate.textContent = stats.rateFormatted;
+        } else if (stats.currentBps !== undefined) {
+            elements.dataRate.textContent = formatRate(stats.currentBps);
+        } else if (stats.currentMbps !== undefined) {
+            elements.dataRate.textContent = stats.currentMbps.toFixed(2) + ' Mbps';
+        }
+    }
+    
+    // Packets per second
+    if (stats.currentPps !== undefined &amp;&amp; elements.pps) {
+        elements.pps.textContent = formatNumber(Math.round(stats.currentPps));
+    } else if (stats.currentRate !== undefined &amp;&amp; elements.pps) {
+        // Fallback to legacy currentRate
+        elements.pps.textContent = formatNumber(stats.currentRate);
+    }
+    
+    // Duration
+    if (stats.durationSec !== undefined &amp;&amp; elements.duration) {
+        elements.duration.textContent = formatDuration(stats.durationSec);
+    } else if (stats.uptime !== undefined &amp;&amp; elements.duration) {
+        // Fallback to legacy uptime (in ms)
+        elements.duration.textContent = formatDuration(stats.uptime / 1000);
+    }
+    
+    // Secondary stats
+    if (stats.bytesSent !== undefined &amp;&amp; elements.bytesSent) {
+        elements.bytesSent.textContent = formatBytes(stats.bytesSent);
+    }
+    
+    if (elements.peakRate) {
+        if (stats.peakBps !== undefined) {
+            elements.peakRate.textContent = formatRate(stats.peakBps);
+        } else if (stats.peakMbps !== undefined) {
+            elements.peakRate.textContent = stats.peakMbps.toFixed(2) + ' Mbps';
+        }
+    }
+    
+    if (stats.avgPacketSize !== undefined &amp;&amp; elements.avgPacketSize) {
+        elements.avgPacketSize.textContent = formatBytes(stats.avgPacketSize);
+    }
+    
+    if (stats.packetsFailed !== undefined &amp;&amp; elements.packetsFailed) {
+        elements.packetsFailed.textContent = formatNumber(stats.packetsFailed);
+        // Highlight if there are errors
+        if (stats.packetsFailed > 0) {
+            elements.packetsFailed.classList.add('error');
+        } else {
+            elements.packetsFailed.classList.remove('error');
+        }
+    }
+    
+    // Sample counter
+    const smpCnt = stats.smpCnt || 0;
+    const smpRate = stats.configuredRate || store.config.sampleRate || 4000;
+    
+    if (elements.smpCntValue) {
+        elements.smpCntValue.textContent = `${formatNumber(smpCnt)} / ${formatNumber(smpRate)}`;
+    }
+    
+    if (elements.smpCntProgress) {
+        const progressPercent = (smpCnt / smpRate) * 100;
+        elements.smpCntProgress.style.width = `${progressPercent}%`;
+    }
+}
+
+/**
+ * Reset all stats to zero
+ */
+function resetStatsDisplay() {
+    updateStatsDisplay({
+        packetsSent: 0,
+        packetsFailed: 0,
+        bytesSent: 0,
+        currentBps: 0,
+        currentPps: 0,
+        peakBps: 0,
+        avgPacketSize: 0,
+        durationSec: 0,
+        smpCnt: 0,
+        configuredRate: store.config.sampleRate
+    });
+}
+
+// ============================================================================
+// EVENT HANDLERS
+// ============================================================================
+
+/**
+ * Handle reset button click
+ */
+function handleResetClick() {
+    // Reset display immediately
+    resetStatsDisplay();
+    
+    // Notify server to reset stats
+    store.setData({ 
+        stats: { 
+            packetsSent: 0, 
+            currentRate: 0, 
+            errors: 0, 
+            uptime: 0, 
+            smpCnt: 0 
+        } 
+    });
+    
+    // Reset stats via Tauri (if available)
+    if (window.__TAURI__) {
+        window.__TAURI__.core.invoke('reset_stats').catch(err => {
+            console.log('[Statistics] Reset stats error (may not be implemented):', err);
+        });
+    }
+    
+    showToast('Statistics reset', 'info');
+    console.log('[Statistics] Stats reset');
+}
+
+/**
+ * Bind all event listeners
+ */
+function bindEvents() {
+    if (elements.resetBtn) {
+        elements.resetBtn.addEventListener('click', handleResetClick);
+    }
+}
+
+// ============================================================================
+// STORE SUBSCRIPTIONS
+// ============================================================================
+
+/**
+ * Subscribe to store changes for stats updates
+ */
+function setupStoreSubscriptions() {
+    // Subscribe to all data changes (including stats)
+    // The store notifies 'data.*' subscribers when any data changes
+    store.subscribe('data.*', (data, changedPath) => {
+        // Only process if it's a stats-related change
+        if (changedPath &amp;&amp; changedPath.startsWith('data.stats')) {
+            console.log('[Statistics] Stats changed:', changedPath, data.stats);
+            if (data.stats) {
+                updateStatsDisplay(data.stats);
+            }
+        }
+    });
+    
+    // Also try direct subscription to specific stat paths
+    const statPaths = [
+        'data.stats.packetsSent',
+        'data.stats.currentBps',
+        'data.stats.currentPps',
+        'data.stats.bytesSent',
+        'data.stats.durationSec',
+        'data.stats.smpCnt'
+    ];
+    
+    statPaths.forEach(path => {
+        store.subscribe(path, (value, changedPath) => {
+            console.log(`[Statistics] ${changedPath} = ${value}`);
+            // Get full stats object and update
+            const stats = store.data.stats;
+            if (stats) {
+                updateStatsDisplay(stats);
+            }
+        });
+    });
+}
+
+// ============================================================================
+// TAURI MESSAGE HANDLER
+// ============================================================================
+
+/**
+ * Handle incoming stats message from Tauri
+ * @memberof module:Statistics
+ * @param {Object} data - Stats data from server
+ */
+export function handleStatsMessage(data) {
+    // Update store (which triggers UI update via subscription)
+    store.setData({ stats: data });
+    
+    // Also update display directly for immediate feedback
+    updateStatsDisplay(data);
+}
+
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+
+/**
+ * Initialize the Statistics module
+ * @memberof module:Statistics
+ * @param {HTMLElement} container - Container element to render into
+ */
+export function init(container) {
+    if (initialized) {
+        console.warn('[Statistics] Already initialized');
+        return;
+    }
+    
+    // Render template
+    if (container) {
+        container.innerHTML = getTemplate();
+    } else {
+        // Try to find default container
+        const defaultContainer = document.getElementById('statistics-container');
+        if (defaultContainer) {
+            defaultContainer.innerHTML = getTemplate();
+        } else {
+            console.error('[Statistics] No container found for Statistics module');
+            return;
+        }
+    }
+    
+    // Cache elements
+    cacheElements();
+    
+    // Bind events
+    bindEvents();
+    
+    // Setup store subscriptions
+    setupStoreSubscriptions();
+    
+    // Register for tauriClient stats events - THIS IS KEY!
+    tauriClient.on('stats', (stats) => {
+        console.log('[Statistics] Received stats from tauriClient:', stats);
+        updateStatsDisplay(stats);
+        // Also update store for other components
+        store.setData({ stats });
+    });
+    
+    // Initial display reset
+    resetStatsDisplay();
+    
+    initialized = true;
+    console.log('[Statistics] Module initialized');
+}
+
+/**
+ * Destroy the module (cleanup)
+ * @memberof module:Statistics
+ */
+export function destroy() {
+    if (elements.resetBtn) {
+        elements.resetBtn.removeEventListener('click', handleResetClick);
+    }
+    
+    // Clear cached elements
+    Object.keys(elements).forEach(key => delete elements[key]);
+    
+    initialized = false;
+    console.log('[Statistics] Module destroyed');
+}
+
+// ============================================================================
+// PUBLIC API
+// ============================================================================
+
+export default {
+    init,
+    destroy,
+    getTemplate,
+    handleStatsMessage,
+    updateStatsDisplay,
+    resetStatsDisplay,
+    // Utilities
+    formatBytes,
+    formatRate,
+    formatDuration
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-FrameViewer.html">FrameViewer</a></li><li><a href="module-app.html">app</a></li><li><a href="module-bindings.html">bindings</a></li><li><a href="module-components.html">components</a></li><li><a href="module-configManager.html">configManager</a></li><li><a href="module-copyFilter.html">copyFilter</a></li><li><a href="module-dragManager.html">dragManager</a></li><li><a href="module-embeddedMathEditor.html">embeddedMathEditor</a></li><li><a href="module-equationTemplates.html">equationTemplates</a></li><li><a href="module-expressionConverter.html">expressionConverter</a></li><li><a href="module-formatters.html">formatters</a></li><li><a href="module-keyboardShortcuts.html">keyboardShortcuts</a></li><li><a href="module-mathEvaluator.html">mathEvaluator</a></li><li><a href="module-mathLiveEditor.html">mathLiveEditor</a></li><li><a href="module-standards.html">standards</a></li><li><a href="module-store.html">store</a></li><li><a href="module-tauriClient.html">tauriClient</a></li><li><a href="module-toast.html">toast</a></li><li><a href="module-validators.html">validators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_copyFilter">_copyFilter</a></li><li><a href="global.html#_getDurationSettings">_getDurationSettings</a></li><li><a href="global.html#_hideTimerDisplay">_hideTimerDisplay</a></li><li><a href="global.html#_setupDragEvents">_setupDragEvents</a></li><li><a href="global.html#_showTimerDisplay">_showTimerDisplay</a></li><li><a href="global.html#_startStatusPolling">_startStatusPolling</a></li><li><a href="global.html#_stopStatusPolling">_stopStatusPolling</a></li><li><a href="global.html#_updateTimerText">_updateTimerText</a></li><li><a href="global.html#autoDetectMAC">autoDetectMAC</a></li><li><a href="global.html#bindEvents">bindEvents</a></li><li><a href="global.html#cacheElements">cacheElements</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#formatDuration">formatDuration</a></li><li><a href="global.html#formatNumber">formatNumber</a></li><li><a href="global.html#formatRate">formatRate</a></li><li><a href="global.html#getChannelsListHTML">getChannelsListHTML</a></li><li><a href="global.html#getDefaultColor">getDefaultColor</a></li><li><a href="global.html#handleQuickAdd">handleQuickAdd</a></li><li><a href="global.html#handleResetClick">handleResetClick</a></li><li><a href="global.html#handleStoreChange">handleStoreChange</a></li><li><a href="global.html#loadNetworkInterfaces">loadNetworkInterfaces</a></li><li><a href="global.html#rebuildSamplesPerCycleDropdown">rebuildSamplesPerCycleDropdown</a></li><li><a href="global.html#resetStatsDisplay">resetStatsDisplay</a></li><li><a href="global.html#setupStoreSubscriptions">setupStoreSubscriptions</a></li><li><a href="global.html#syncFromStore">syncFromStore</a></li><li><a href="global.html#syncToServer">syncToServer</a></li><li><a href="global.html#updateSampleRate">updateSampleRate</a></li><li><a href="global.html#updateStandard">updateStandard</a></li><li><a href="global.html#updateStatsDisplay">updateStatsDisplay</a></li><li><a href="global.html#validateMAC">validateMAC</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 05 2026 21:30:19 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

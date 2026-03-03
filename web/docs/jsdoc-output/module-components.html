@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Module: components</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Module: components</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>This module serves as the central hub for all UI components in the SV Publisher
+application. Each component is self-contained and follows a consistent pattern.</p>
+<p><strong>Component Architecture:</strong></p>
+<p>Each component follows this pattern:</p>
+<ul>
+<li><code>getTemplate()</code> - Returns HTML string</li>
+<li><code>init(container)</code> - Initializes component in container</li>
+<li>DOM Element Cache - Cached references to elements</li>
+<li>Event Handlers - User interaction handlers</li>
+<li>Store Sync - Subscribe to store changes</li>
+</ul>
+<p><strong>Three-Column Layout:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Components</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Left</td>
+<td>DataSource, ChannelsDisplay, StandardSelector, StreamSettings</td>
+</tr>
+<tr>
+<td>Middle</td>
+<td>FrameViewer</td>
+</tr>
+<tr>
+<td>Right</td>
+<td>PublishPanel, Statistics, WiresharkHelper, Preview</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Component Reference:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+<th>Store Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>StandardSelector</td>
+<td>IEC standard selection</td>
+<td>config.standard</td>
+</tr>
+<tr>
+<td>StreamSettings</td>
+<td>Frequency, interface, sampling</td>
+<td>config.frequency, config.interface</td>
+</tr>
+<tr>
+<td>DataSource</td>
+<td>PCAP/Equation input</td>
+<td>data.pcap, data.channels</td>
+</tr>
+<tr>
+<td>ChannelsDisplay</td>
+<td>Active channel list</td>
+<td>data.channels</td>
+</tr>
+<tr>
+<td>FrameViewer</td>
+<td>SV frame structure</td>
+<td>config.standardConfig</td>
+</tr>
+<tr>
+<td>PublishPanel</td>
+<td>Start/Stop controls</td>
+<td>data.publishing</td>
+</tr>
+<tr>
+<td>Statistics</td>
+<td>Real-time stats</td>
+<td>data.stats</td>
+</tr>
+<tr>
+<td>WiresharkHelper</td>
+<td>Capture filter help</td>
+<td>config.srcMAC</td>
+</tr>
+<tr>
+<td>Preview</td>
+<td>Packet preview</td>
+<td>config.*, data.channels</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Component Lifecycle:</strong></p>
+<ol>
+<li>Import component from this module</li>
+<li>Call <code>Component.init(containerElement)</code></li>
+<li>Component renders and subscribes to store</li>
+<li>User interactions update store</li>
+<li>Store notifies component, component re-renders</li>
+</ol>
+<p><strong>Security:</strong></p>
+<ul>
+<li>All components sanitize user input</li>
+<li>Templates use validated data only</li>
+<li>Event handlers validate before processing</li>
+<li>Store updates are validated</li>
+</ul></div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-version">Version:</dt>
+    <dd class="tag-version"><ul class="dummy"><li>1.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>SV-PUB Team</li>
+        </ul>
+    </dd>
+    
+
+    
+    <dt class="tag-copyright">Copyright:</dt>
+    <dd class="tag-copyright"><ul class="dummy"><li>2025 SV Publisher</li></ul></dd>
+    
+
+    
+    <dt class="tag-license">License:</dt>
+    <dd class="tag-license"><ul class="dummy"><li>Proprietary</li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js_components_index.js.html">js/components/index.js</a>, <a href="js_components_index.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="module-store.html"><code>module:store</code></a> for state management</li>
+        
+            <li><a href="module-app.html"><code>module:app</code></a> for initialization sequence</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Examples</h5>
+    
+        <p class="code-caption">Import Individual Components</p>
+    
+    <pre class="prettyprint"><code>import { StandardSelector, StreamSettings } from './components/index.js';StandardSelector.init(document.getElementById('standard-container'));</code></pre>
+
+        <p class="code-caption">Access Component Methods</p>
+    
+    <pre class="prettyprint"><code>import { Statistics } from './components/index.js';// Components expose public methodsStatistics.updateStats({ packetsSent: 1000 });</code></pre>
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        
+                
+<h4 class="name" id="~StandardSelectorComponent">StandardSelectorComponent</h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>init</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Initialize the component</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>getTemplate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Get HTML template</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js_components_index.js.html">js/components/index.js</a>, <a href="js_components_index.js.html#line77">line 77</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-FrameViewer.html">FrameViewer</a></li><li><a href="module-app.html">app</a></li><li><a href="module-bindings.html">bindings</a></li><li><a href="module-components.html">components</a></li><li><a href="module-configManager.html">configManager</a></li><li><a href="module-copyFilter.html">copyFilter</a></li><li><a href="module-dragManager.html">dragManager</a></li><li><a href="module-embeddedMathEditor.html">embeddedMathEditor</a></li><li><a href="module-equationTemplates.html">equationTemplates</a></li><li><a href="module-expressionConverter.html">expressionConverter</a></li><li><a href="module-formatters.html">formatters</a></li><li><a href="module-keyboardShortcuts.html">keyboardShortcuts</a></li><li><a href="module-mathEvaluator.html">mathEvaluator</a></li><li><a href="module-mathLiveEditor.html">mathLiveEditor</a></li><li><a href="module-standards.html">standards</a></li><li><a href="module-store.html">store</a></li><li><a href="module-tauriClient.html">tauriClient</a></li><li><a href="module-toast.html">toast</a></li><li><a href="module-validators.html">validators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_copyFilter">_copyFilter</a></li><li><a href="global.html#_getDurationSettings">_getDurationSettings</a></li><li><a href="global.html#_hideTimerDisplay">_hideTimerDisplay</a></li><li><a href="global.html#_setupDragEvents">_setupDragEvents</a></li><li><a href="global.html#_showTimerDisplay">_showTimerDisplay</a></li><li><a href="global.html#_startStatusPolling">_startStatusPolling</a></li><li><a href="global.html#_stopStatusPolling">_stopStatusPolling</a></li><li><a href="global.html#_updateTimerText">_updateTimerText</a></li><li><a href="global.html#autoDetectMAC">autoDetectMAC</a></li><li><a href="global.html#bindEvents">bindEvents</a></li><li><a href="global.html#cacheElements">cacheElements</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#formatDuration">formatDuration</a></li><li><a href="global.html#formatNumber">formatNumber</a></li><li><a href="global.html#formatRate">formatRate</a></li><li><a href="global.html#getChannelsListHTML">getChannelsListHTML</a></li><li><a href="global.html#getDefaultColor">getDefaultColor</a></li><li><a href="global.html#handleQuickAdd">handleQuickAdd</a></li><li><a href="global.html#handleResetClick">handleResetClick</a></li><li><a href="global.html#handleStoreChange">handleStoreChange</a></li><li><a href="global.html#loadNetworkInterfaces">loadNetworkInterfaces</a></li><li><a href="global.html#rebuildSamplesPerCycleDropdown">rebuildSamplesPerCycleDropdown</a></li><li><a href="global.html#resetStatsDisplay">resetStatsDisplay</a></li><li><a href="global.html#setupStoreSubscriptions">setupStoreSubscriptions</a></li><li><a href="global.html#syncFromStore">syncFromStore</a></li><li><a href="global.html#syncToServer">syncToServer</a></li><li><a href="global.html#updateSampleRate">updateSampleRate</a></li><li><a href="global.html#updateStandard">updateStandard</a></li><li><a href="global.html#updateStatsDisplay">updateStatsDisplay</a></li><li><a href="global.html#validateMAC">validateMAC</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 05 2026 21:30:19 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

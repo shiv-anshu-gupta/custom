@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: js/components/DataSource.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: js/components/DataSource.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module DataSource
+ * @file modules/DataSource.js
+ * @description Data Source Module for PCAP and Equation selection.
+ * Handles tabs, PCAP upload, and equation editor integration.
+ * 
+ * @author SV-PUB Team
+ * @date 2025
+ */
+
+import store from '../store/index.js';
+import { showToast } from '../plugins/toast.js';
+import { DEFAULT_EQUATIONS } from '../../shared/standards.js';
+
+// ============================================================================
+// MODULE STATE
+// ============================================================================
+
+let initialized = false;
+const elements = {};
+let activeTab = 'pcap';
+
+// ============================================================================
+// DOM TEMPLATE
+// ============================================================================
+
+/**
+ * Get the HTML template for this module
+ * @memberof module:DataSource
+ * @returns {string} HTML template string
+ */
+export function getTemplate() {
+    return `
+        &lt;section class="card" id="data-source-module">
+            &lt;div class="card-header">
+                &lt;h2>Data Source&lt;/h2>
+            &lt;/div>
+            &lt;div class="card-body">
+                &lt;!-- Tabs -->
+                &lt;div class="tabs" id="dataSourceTabs">
+                    &lt;button class="tab active" data-tab="pcap">
+                        &lt;span class="tab-icon">📁&lt;/span>
+                        PCAP File
+                    &lt;/button>
+                    &lt;button class="tab" data-tab="equation">
+                        &lt;span class="tab-icon">📐&lt;/span>
+                        Equation Editor
+                    &lt;/button>
+                &lt;/div>
+
+                &lt;!-- PCAP Tab -->
+                &lt;div class="tab-content active" id="pcap-tab">
+                    &lt;!-- Upload Area -->
+                    &lt;div class="file-upload-area" id="pcapDropZone">
+                        &lt;div class="upload-icon">📁&lt;/div>
+                        &lt;p class="upload-title">Drag &amp; drop PCAP file here&lt;/p>
+                        &lt;p class="upload-hint">or click to browse&lt;/p>
+                        &lt;p class="upload-formats">Supports: .pcap, .pcapng&lt;/p>
+                        &lt;input type="file" id="pcapFile" accept=".pcap,.pcapng" hidden>
+                    &lt;/div>
+                    
+                    &lt;!-- PCAP Info (shown after loading) -->
+                    &lt;div class="pcap-info hidden" id="pcapInfo">
+                        &lt;div class="pcap-file-header">
+                            &lt;span class="file-icon">📄&lt;/span>
+                            &lt;span class="file-name" id="pcapFileName">capture.pcap&lt;/span>
+                            &lt;button class="btn btn-small btn-danger" id="removePcap">✕ Remove&lt;/button>
+                        &lt;/div>
+                        &lt;div class="pcap-stats">
+                            &lt;div class="pcap-stat">
+                                &lt;span class="stat-value" id="pcapPackets">0&lt;/span>
+                                &lt;span class="stat-label">Packets&lt;/span>
+                            &lt;/div>
+                            &lt;div class="pcap-stat">
+                                &lt;span class="stat-value" id="pcapDuration">0s&lt;/span>
+                                &lt;span class="stat-label">Duration&lt;/span>
+                            &lt;/div>
+                            &lt;div class="pcap-stat">
+                                &lt;span class="stat-value" id="pcapStreams">0&lt;/span>
+                                &lt;span class="stat-label">Streams&lt;/span>
+                            &lt;/div>
+                            &lt;div class="pcap-stat">
+                                &lt;span class="stat-value" id="pcapRate">0/s&lt;/span>
+                                &lt;span class="stat-label">Rate&lt;/span>
+                            &lt;/div>
+                        &lt;/div>
+                        &lt;div class="pcap-options">
+                            &lt;label class="checkbox-label">
+                                &lt;input type="checkbox" id="loopPlayback">
+                                &lt;span>Loop continuously&lt;/span>
+                            &lt;/label>
+                            &lt;div class="speed-control">
+                                &lt;label for="playbackSpeed">Speed:&lt;/label>
+                                &lt;select id="playbackSpeed">
+                                    &lt;option value="1" selected>1x (Real-time)&lt;/option>
+                                    &lt;option value="0">Max Speed&lt;/option>
+                                &lt;/select>
+                            &lt;/div>
+                        &lt;/div>
+                    &lt;/div>
+                &lt;/div>
+
+                &lt;!-- Equation Editor Tab -->
+                &lt;div class="tab-content" id="equation-tab">
+                    &lt;!-- Hidden inputs to store equation values -->
+                    &lt;input type="hidden" id="eqVa" value="${DEFAULT_EQUATIONS.Va}">
+                    &lt;input type="hidden" id="eqVb" value="${DEFAULT_EQUATIONS.Vb}">
+                    &lt;input type="hidden" id="eqVc" value="${DEFAULT_EQUATIONS.Vc}">
+                    &lt;input type="hidden" id="eqVn" value="${DEFAULT_EQUATIONS.Vn}">
+                    &lt;input type="hidden" id="eqIa" value="${DEFAULT_EQUATIONS.Ia}">
+                    &lt;input type="hidden" id="eqIb" value="${DEFAULT_EQUATIONS.Ib}">
+                    &lt;input type="hidden" id="eqIc" value="${DEFAULT_EQUATIONS.Ic}">
+                    &lt;input type="hidden" id="eqIn" value="${DEFAULT_EQUATIONS.In}">
+                    
+                    &lt;!-- Embedded MathLive Editor Container -->
+                    &lt;div id="embeddedEditorContainer">
+                        &lt;div class="em-loading">
+                            &lt;span class="loading-icon">⏳&lt;/span>
+                            &lt;span>Loading Equation Editor...&lt;/span>
+                        &lt;/div>
+                    &lt;/div>
+                &lt;/div>
+            &lt;/div>
+        &lt;/section>
+    `;
+}
+
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+
+/**
+ * Initialize the module
+ * @memberof module:DataSource
+ * @param {HTMLElement} container - Container element to render into (optional)
+ */
+export function init(container = null) {
+    if (initialized) {
+        console.warn('[DataSource] Already initialized');
+        return;
+    }
+
+    // If container provided, inject template
+    if (container) {
+        container.innerHTML = getTemplate();
+    }
+
+    // Cache DOM elements
+    cacheElements();
+
+    // Bind events
+    bindEvents();
+
+    // Set initial values from store
+    syncFromStore();
+
+    // Subscribe to store changes
+    store.subscribe('data.pcap', syncPcapFromStore);
+    store.subscribe('data.equations', syncEquationsFromStore);
+    store.subscribe('data.publishing.mode', (mode) => {
+        activeTab = mode;
+        updateActiveSource();
+    });
+
+    initialized = true;
+    console.log('[DataSource] Initialized');
+}
+
+function cacheElements() {
+    // Tabs
+    elements.tabs = document.querySelectorAll('#dataSourceTabs .tab');
+    elements.tabContents = {
+        pcap: document.getElementById('pcap-tab'),
+        equation: document.getElementById('equation-tab')
+    };
+
+    // PCAP elements
+    elements.dropZone = document.getElementById('pcapDropZone');
+    elements.fileInput = document.getElementById('pcapFile');
+    elements.pcapInfo = document.getElementById('pcapInfo');
+    elements.pcapFileName = document.getElementById('pcapFileName');
+    elements.pcapPackets = document.getElementById('pcapPackets');
+    elements.pcapDuration = document.getElementById('pcapDuration');
+    elements.pcapStreams = document.getElementById('pcapStreams');
+    elements.pcapRate = document.getElementById('pcapRate');
+    elements.removePcap = document.getElementById('removePcap');
+    elements.loopPlayback = document.getElementById('loopPlayback');
+    elements.playbackSpeed = document.getElementById('playbackSpeed');
+
+    // Equation elements (hidden inputs)
+    elements.equations = {
+        Va: document.getElementById('eqVa'),
+        Vb: document.getElementById('eqVb'),
+        Vc: document.getElementById('eqVc'),
+        Vn: document.getElementById('eqVn'),
+        Ia: document.getElementById('eqIa'),
+        Ib: document.getElementById('eqIb'),
+        Ic: document.getElementById('eqIc'),
+        In: document.getElementById('eqIn')
+    };
+
+    // Active source display
+    elements.activeSource = document.getElementById('activeSource');
+}
+
+// ============================================================================
+// EVENT BINDING
+// ============================================================================
+
+function bindEvents() {
+    // Tab switching
+    elements.tabs?.forEach(tab => {
+        tab.addEventListener('click', () => handleTabClick(tab));
+    });
+
+    // PCAP drop zone
+    if (elements.dropZone) {
+        elements.dropZone.addEventListener('click', () => elements.fileInput?.click());
+        elements.dropZone.addEventListener('dragover', handleDragOver);
+        elements.dropZone.addEventListener('dragleave', handleDragLeave);
+        elements.dropZone.addEventListener('drop', handleDrop);
+    }
+
+    // File input
+    elements.fileInput?.addEventListener('change', handleFileSelect);
+
+    // Remove PCAP button
+    elements.removePcap?.addEventListener('click', removePcap);
+
+    // Equation hidden input changes (for external editors)
+    Object.entries(elements.equations).forEach(([id, input]) => {
+        input?.addEventListener('change', () => {
+            // Update equation in channels array
+            const channels = store.data.channels || [];
+            const updatedChannels = channels.map(ch => 
+                ch.id === id ? { ...ch, equation: input.value } : ch
+            );
+            store.setData({ channels: updatedChannels });
+        });
+    });
+}
+
+// ============================================================================
+// TAB HANDLING
+// ============================================================================
+
+function handleTabClick(tab) {
+    const tabName = tab.dataset.tab;
+    if (tabName === activeTab) return;
+
+    // Update active tab
+    activeTab = tabName;
+
+    // Update tab buttons
+    elements.tabs.forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tabName);
+    });
+
+    // Update tab contents
+    Object.entries(elements.tabContents).forEach(([name, content]) => {
+        content?.classList.toggle('active', name === tabName);
+    });
+
+    // Update store
+    store.setData({ publishing: { mode: tabName } });
+
+    // Update active source display
+    updateActiveSource();
+
+    console.log('[DataSource] Tab switched to:', tabName);
+}
+
+function updateActiveSource() {
+    if (elements.activeSource) {
+        if (activeTab === 'pcap') {
+            elements.activeSource.textContent = store.data.pcap.loaded 
+                ? `PCAP: ${store.data.pcap.filename}` 
+                : 'PCAP File';
+        } else {
+            elements.activeSource.textContent = 'Equation Editor';
+        }
+    }
+}
+
+// ============================================================================
+// PCAP HANDLING
+// ============================================================================
+
+function handleDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    elements.dropZone.classList.add('dragover');
+}
+
+function handleDragLeave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    elements.dropZone.classList.remove('dragover');
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    elements.dropZone.classList.remove('dragover');
+
+    const files = e.dataTransfer?.files;
+    if (files?.length > 0) {
+        uploadPcap(files[0]);
+    }
+}
+
+function handleFileSelect(e) {
+    const file = e.target.files?.[0];
+    if (file) {
+        uploadPcap(file);
+    }
+}
+
+async function uploadPcap(file) {
+    // Validate file type
+    if (!file.name.match(/\.(pcap|pcapng)$/i)) {
+        showToast('Please upload a .pcap or .pcapng file', 'error');
+        return;
+    }
+
+    showToast('Uploading PCAP file...', 'info');
+
+    const formData = new FormData();
+    formData.append('pcap', file);
+
+    try {
+        const response = await fetch('/api/pcap/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Update store
+            store.setData({
+                pcap: {
+                    loaded: true,
+                    filename: file.name,
+                    frameCount: result.frameCount || 0,
+                    duration: result.duration || 0
+                }
+            });
+
+            // Update UI
+            showPcapInfo(file.name, result);
+            showToast(`Loaded ${result.frameCount?.toLocaleString()} packets`, 'success');
+        } else {
+            showToast(result.error || 'Failed to load PCAP', 'error');
+        }
+    } catch (err) {
+        console.error('[DataSource] PCAP upload failed:', err);
+        showToast('Failed to upload PCAP file', 'error');
+    }
+}
+
+function showPcapInfo(filename, data) {
+    elements.dropZone?.classList.add('hidden');
+    elements.pcapInfo?.classList.remove('hidden');
+
+    if (elements.pcapFileName) elements.pcapFileName.textContent = filename;
+    if (elements.pcapPackets) elements.pcapPackets.textContent = (data.frameCount || 0).toLocaleString();
+    if (elements.pcapDuration) elements.pcapDuration.textContent = `${(data.duration || 0).toFixed(1)}s`;
+    if (elements.pcapStreams) elements.pcapStreams.textContent = data.streams || '1';
+    if (elements.pcapRate) {
+        const rate = data.duration > 0 ? Math.round(data.frameCount / data.duration) : 0;
+        elements.pcapRate.textContent = `${rate.toLocaleString()}/s`;
+    }
+
+    updateActiveSource();
+}
+
+async function removePcap() {
+    try {
+        await fetch('/api/pcap', { method: 'DELETE' });
+    } catch (e) {
+        console.warn('[DataSource] Failed to notify server of PCAP removal');
+    }
+
+    // Update store
+    store.setData({
+        pcap: {
+            loaded: false,
+            filename: '',
+            frameCount: 0,
+            duration: 0
+        }
+    });
+
+    // Update UI
+    elements.dropZone?.classList.remove('hidden');
+    elements.pcapInfo?.classList.add('hidden');
+    elements.fileInput.value = '';
+
+    updateActiveSource();
+    showToast('PCAP file removed');
+}
+
+// ============================================================================
+// SYNC
+// ============================================================================
+
+function syncFromStore() {
+    syncPcapFromStore();
+    syncEquationsFromStore();
+}
+
+function syncPcapFromStore() {
+    const pcap = store.data.pcap;
+    if (pcap.loaded) {
+        showPcapInfo(pcap.filename, {
+            frameCount: pcap.frameCount,
+            duration: pcap.duration
+        });
+    } else {
+        elements.dropZone?.classList.remove('hidden');
+        elements.pcapInfo?.classList.add('hidden');
+    }
+}
+
+function syncEquationsFromStore() {
+    // Get equations from unified channels array
+    const channels = store.data.channels || [];
+    const equations = {};
+    channels.forEach(ch => {
+        equations[ch.id] = ch.equation;
+    });
+    
+    Object.entries(elements.equations).forEach(([id, input]) => {
+        if (input &amp;&amp; equations[id] !== undefined) {
+            input.value = equations[id];
+        }
+    });
+}
+
+// ============================================================================
+// PUBLIC API
+// ============================================================================
+
+/**
+ * Get active tab
+ * @memberof module:DataSource
+ * @returns {string} Active tab name
+ */
+export function getActiveTab() {
+    return activeTab;
+}
+
+/**
+ * Check if PCAP is loaded
+ * @memberof module:DataSource
+ * @returns {boolean}
+ */
+export function isPcapLoaded() {
+    return store.data.pcap.loaded;
+}
+
+/**
+ * Get equations
+ * @memberof module:DataSource
+ * @returns {Object} Channel IDs as keys and equations as values
+ */
+export function getEquations() {
+    const channels = store.data.channels || [];
+    const equations = {};
+    channels.forEach(ch => {
+        equations[ch.id] = ch.equation;
+    });
+    return equations;
+}
+
+/**
+ * Set equation value
+ * @memberof module:DataSource
+ * @param {string} id - Channel ID
+ * @param {string} value - Equation value
+ */
+export function setEquation(id, value) {
+    const channels = store.data.channels || [];
+    const updatedChannels = channels.map(ch => 
+        ch.id === id ? { ...ch, equation: value } : ch
+    );
+    store.setData({ channels: updatedChannels });
+}
+
+/**
+ * Switch to tab
+ * @memberof module:DataSource
+ * @param {string} tabName - Tab name to switch to
+ */
+export function switchTab(tabName) {
+    const tab = Array.from(elements.tabs || []).find(t => t.dataset.tab === tabName);
+    if (tab) {
+        handleTabClick(tab);
+    }
+}
+
+/**
+ * Destroy module
+ * @memberof module:DataSource
+ */
+export function destroy() {
+    initialized = false;
+}
+
+// ============================================================================
+// DEFAULT EXPORT
+// ============================================================================
+
+export default {
+    init,
+    getTemplate,
+    getActiveTab,
+    isPcapLoaded,
+    getEquations,
+    setEquation,
+    switchTab,
+    destroy
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-FrameViewer.html">FrameViewer</a></li><li><a href="module-app.html">app</a></li><li><a href="module-bindings.html">bindings</a></li><li><a href="module-components.html">components</a></li><li><a href="module-configManager.html">configManager</a></li><li><a href="module-copyFilter.html">copyFilter</a></li><li><a href="module-dragManager.html">dragManager</a></li><li><a href="module-embeddedMathEditor.html">embeddedMathEditor</a></li><li><a href="module-equationTemplates.html">equationTemplates</a></li><li><a href="module-expressionConverter.html">expressionConverter</a></li><li><a href="module-formatters.html">formatters</a></li><li><a href="module-keyboardShortcuts.html">keyboardShortcuts</a></li><li><a href="module-mathEvaluator.html">mathEvaluator</a></li><li><a href="module-mathLiveEditor.html">mathLiveEditor</a></li><li><a href="module-standards.html">standards</a></li><li><a href="module-store.html">store</a></li><li><a href="module-tauriClient.html">tauriClient</a></li><li><a href="module-toast.html">toast</a></li><li><a href="module-validators.html">validators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_copyFilter">_copyFilter</a></li><li><a href="global.html#_getDurationSettings">_getDurationSettings</a></li><li><a href="global.html#_hideTimerDisplay">_hideTimerDisplay</a></li><li><a href="global.html#_setupDragEvents">_setupDragEvents</a></li><li><a href="global.html#_showTimerDisplay">_showTimerDisplay</a></li><li><a href="global.html#_startStatusPolling">_startStatusPolling</a></li><li><a href="global.html#_stopStatusPolling">_stopStatusPolling</a></li><li><a href="global.html#_updateTimerText">_updateTimerText</a></li><li><a href="global.html#autoDetectMAC">autoDetectMAC</a></li><li><a href="global.html#bindEvents">bindEvents</a></li><li><a href="global.html#cacheElements">cacheElements</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#formatDuration">formatDuration</a></li><li><a href="global.html#formatNumber">formatNumber</a></li><li><a href="global.html#formatRate">formatRate</a></li><li><a href="global.html#getChannelsListHTML">getChannelsListHTML</a></li><li><a href="global.html#getDefaultColor">getDefaultColor</a></li><li><a href="global.html#handleQuickAdd">handleQuickAdd</a></li><li><a href="global.html#handleResetClick">handleResetClick</a></li><li><a href="global.html#handleStoreChange">handleStoreChange</a></li><li><a href="global.html#loadNetworkInterfaces">loadNetworkInterfaces</a></li><li><a href="global.html#rebuildSamplesPerCycleDropdown">rebuildSamplesPerCycleDropdown</a></li><li><a href="global.html#resetStatsDisplay">resetStatsDisplay</a></li><li><a href="global.html#setupStoreSubscriptions">setupStoreSubscriptions</a></li><li><a href="global.html#syncFromStore">syncFromStore</a></li><li><a href="global.html#syncToServer">syncToServer</a></li><li><a href="global.html#updateSampleRate">updateSampleRate</a></li><li><a href="global.html#updateStandard">updateStandard</a></li><li><a href="global.html#updateStatsDisplay">updateStatsDisplay</a></li><li><a href="global.html#validateMAC">validateMAC</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 05 2026 21:30:19 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

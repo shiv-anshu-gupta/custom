@@ -1,0 +1,12 @@
+<map id="sv_stats.h" name="sv_stats.h">
+<area shape="rect" id="Node000001" title="Transmission Statistics Module." alt="" coords="145,5,227,32"/>
+<area shape="rect" id="Node000002" href="$sv__controller_8cc.html" title="Implementation of SharedBuffer + SvController + Multi&#45;Publisher FFI." alt="" coords="5,155,119,181"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="128,30,82,48,61,63,44,81,38,99,41,118,56,154,51,155,35,120,33,99,40,79,58,59,80,44,131,26"/>
+<area shape="rect" id="Node000003" href="$sv__controller_8h.html" title="Main Controller + SharedBuffer for Multi&#45;Publisher SV System." alt="" coords="54,80,160,107"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="163,41,123,82,119,78,159,45"/>
+<area shape="rect" id="Node000004" href="$sv__native__refactored_8cc.html" title="SV Publisher &#45; Main Entry Point for Tauri FFI." alt="" coords="184,80,345,107"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="212,40,254,80,248,80,210,45"/>
+<area shape="rect" id="Node000005" href="$sv__stats__impl_8cc.html" title="Transmission Statistics Tracker." alt="" coords="368,80,489,107"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="242,34,389,78,384,80,242,39"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="94,119,72,156,68,153,89,121"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="SvController::resetAll" name="SvController::resetAll">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,151,57"/>
+<area shape="rect" id="Node000002" href="$sv__native__refactored_8cc.html#afc51a55f01e77fb4264498f176d9438e" title="Stop publishing." alt="" coords="199,5,346,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="151,32,186,30,181,31,152,37"/>
+<area shape="rect" id="Node000004" href="$sv__stats__impl_8cc.html#a4e5f02e3cc9b2b06496cca1b54582e0a" title="Reset all statistics to zero." alt="" coords="208,56,336,83"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="151,51,195,59,190,59,151,56"/>
+<area shape="rect" id="Node000003" href="$sv__native__refactored_8cc.html#a24b2107199112b58a421c0c873ea7d12" title=" " alt="" coords="394,5,519,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="346,16,381,18,376,19,347,21"/>
+</map>

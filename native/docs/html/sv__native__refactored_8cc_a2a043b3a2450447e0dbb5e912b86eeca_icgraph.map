@@ -1,0 +1,7 @@
+<map id="npcap_publisher_is_running" name="npcap_publisher_is_running">
+<area shape="rect" id="Node000001" title="Check if publisher is running." alt="" coords="357,5,489,48"/>
+<area shape="rect" id="Node000002" href="$class_sv_controller.html#afc0ec922fad685082c626ca36cb764a8" title=" " alt="" coords="167,13,309,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="339,27,309,29,309,24,344,27"/>
+<area shape="rect" id="Node000003" href="$sv__controller_8cc.html#a1b6b0344797b9edf84722fde0e1c660a" title=" " alt="" coords="5,13,119,40"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="148,27,119,29,119,24,153,26"/>
+</map>

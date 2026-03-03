@@ -1,0 +1,51 @@
+<map id="sv_controller.h" name="sv_controller.h">
+<area shape="rect" id="Node000001" title="Main Controller + SharedBuffer for Multi&#45;Publisher SV System." alt="" coords="933,5,1039,32"/>
+<area shape="rect" id="Node000002" href="$sv__publisher__instance_8h.html" title="Single SV Publisher Instance (one Merging Unit)." alt="" coords="223,80,384,107"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="932,28,400,84,399,79,933,23"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="554,155,610,181"/>
+<area shape="poly" id="edge25_Node000001_Node000009" title=" " alt="" coords="930,19,835,23,720,31,665,38,615,49,576,63,551,82,545,95,546,110,563,143,558,141,541,112,540,94,547,78,574,59,614,44,664,33,719,25,835,18,935,19"/>
+<area shape="rect" id="Node000012" href="$npcap__transmitter_8h.html" title="Npcap Network Transmitter Module." alt="" coords="667,80,804,107"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="945,32,795,78,794,73,940,33"/>
+<area shape="rect" id="Node000014" href="$sv__stats_8h.html" title="Transmission Statistics Module." alt="" coords="561,80,643,107"/>
+<area shape="poly" id="edge17_Node000001_Node000014" title=" " alt="" coords="930,30,659,82,658,77,935,28"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="828,80,886,107"/>
+<area shape="poly" id="edge19_Node000001_Node000015" title=" " alt="" coords="966,32,894,74,892,70,961,33"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="909,80,978,107"/>
+<area shape="poly" id="edge20_Node000001_Node000016" title=" " alt="" coords="981,31,960,69,957,65,977,34"/>
+<area shape="rect" id="Node000017" title=" " alt="" coords="1002,80,1059,107"/>
+<area shape="poly" id="edge21_Node000001_Node000017" title=" " alt="" coords="995,30,1017,68,1012,66,993,35"/>
+<area shape="rect" id="Node000018" title=" " alt="" coords="1083,80,1143,107"/>
+<area shape="poly" id="edge22_Node000001_Node000018" title=" " alt="" coords="1009,30,1080,72,1075,72,1008,35"/>
+<area shape="rect" id="Node000019" title=" " alt="" coords="1167,80,1224,107"/>
+<area shape="poly" id="edge23_Node000001_Node000019" title=" " alt="" coords="1023,30,1155,77,1149,77,1022,35"/>
+<area shape="rect" id="Node000020" title=" " alt="" coords="1248,80,1322,107"/>
+<area shape="poly" id="edge24_Node000001_Node000020" title=" " alt="" coords="1040,30,1235,79,1230,79,1039,35"/>
+<area shape="rect" id="Node000021" title=" " alt="" coords="1346,80,1429,107"/>
+<area shape="poly" id="edge26_Node000001_Node000021" title=" " alt="" coords="1040,26,1333,79,1328,80,1040,31"/>
+<area shape="rect" id="Node000022" title=" " alt="" coords="1454,80,1551,107"/>
+<area shape="poly" id="edge27_Node000001_Node000022" title=" " alt="" coords="1040,23,1213,45,1441,80,1436,80,1213,50,1040,29"/>
+<area shape="rect" id="Node000003" href="$sv__encoder_8h.html" title="IEC 61850&#45;9&#45;2LE SV Packet Encoder." alt="" coords="210,155,309,181"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="298,106,277,143,273,139,294,109"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="185,229,246,256"/>
+<area shape="poly" id="edge8_Node000002_Node000004" title=" " alt="" coords="259,109,228,128,212,141,201,156,196,170,195,185,204,216,199,214,190,185,190,169,196,153,209,137,225,123,263,106"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="270,229,334,256"/>
+<area shape="poly" id="edge9_Node000002_Node000005" title=" " alt="" coords="310,105,321,140,324,161,323,182,314,216,310,213,318,181,319,161,316,141,307,109"/>
+<area shape="rect" id="Node000006" href="$equation__processor_8h.html" title="Equation Processing for SV Publisher." alt="" coords="384,155,530,181"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="331,105,419,147,413,148,330,110"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="357,105,542,153,536,155,357,110"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="5,155,66,181"/>
+<area shape="poly" id="edge11_Node000002_Node000010" title=" " alt="" coords="255,110,82,157,80,151,256,105"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="90,155,136,181"/>
+<area shape="poly" id="edge12_Node000002_Node000011" title=" " alt="" coords="268,109,151,155,149,150,272,105"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="254,181,233,218,229,214,250,183"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="268,180,290,217,285,215,266,184"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="613,229,677,256"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="490,179,601,224,596,223,489,184"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="455,229,523,256"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="464,180,480,216,475,214,461,184"/>
+<area shape="rect" id="Node000013" href="$sv__native_8h.html" title="Header for Tauri FFI &#45; C interface for Rust." alt="" coords="634,155,722,181"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="728,106,699,145,696,140,723,109"/>
+<area shape="poly" id="edge15_Node000013_Node000007" title=" " alt="" coords="675,180,659,217,655,213,670,183"/>
+<area shape="poly" id="edge16_Node000013_Node000008" title=" " alt="" coords="648,181,537,226,536,221,643,182"/>
+<area shape="poly" id="edge18_Node000014_Node000013" title=" " alt="" coords="616,105,657,145,652,143,615,110"/>
+</map>

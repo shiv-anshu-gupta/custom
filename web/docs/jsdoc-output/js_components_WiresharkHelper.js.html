@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: js/components/WiresharkHelper.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: js/components/WiresharkHelper.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module WiresharkHelper
+ * @file components/WiresharkHelper.js
+ * @description Wireshark Helper Module - Quick Reference for Packet Capture.
+ * Shows Wireshark filter and capture steps with copy functionality.
+ * 
+ * @author SV-PUB Team
+ * @date 2025
+ */
+
+import { showToast } from '../plugins/toast.js';
+
+// ============================================================================
+// MODULE STATE
+// ============================================================================
+
+let _initialized = false;
+const _elements = {};
+
+// ============================================================================
+// DOM TEMPLATE
+// ============================================================================
+
+/**
+ * Get the HTML template for Wireshark helper
+ * @memberof module:WiresharkHelper
+ * @returns {string} HTML template string
+ */
+export function getTemplate() {
+    return `
+        &lt;section class="card" id="wireshark-module">
+            &lt;div class="card-header">
+                &lt;h2>🦈 Wireshark&lt;/h2>
+            &lt;/div>
+            &lt;div class="card-body">
+                &lt;p class="wireshark-text">Filter for SV packets:&lt;/p>
+                &lt;div class="filter-box">
+                    &lt;code id="wiresharkFilter">eth.type == 0x88ba&lt;/code>
+                    &lt;button class="copy-btn" id="copyFilterBtn">📋 Copy&lt;/button>
+                &lt;/div>
+                &lt;div class="wireshark-steps">
+                    &lt;ol>
+                        &lt;li>Open Wireshark&lt;/li>
+                        &lt;li>Select network interface&lt;/li>
+                        &lt;li>Paste filter above&lt;/li>
+                        &lt;li>Start capture&lt;/li>
+                        &lt;li>Click START here&lt;/li>
+                        &lt;li>Verify packets ✓&lt;/li>
+                    &lt;/ol>
+                &lt;/div>
+            &lt;/div>
+        &lt;/section>
+    `;
+}
+
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+
+/**
+ * Initialize the Wireshark Helper module
+ * @memberof module:WiresharkHelper
+ * @param {HTMLElement} container - Container element to inject template
+ */
+export function init(container) {
+    if (_initialized) {
+        console.warn('[WiresharkHelper] Already initialized');
+        return;
+    }
+    
+    console.log('[WiresharkHelper] Initializing...');
+    
+    // Inject template
+    container.innerHTML = getTemplate();
+    
+    // Cache elements
+    _elements.filter = document.getElementById('wiresharkFilter');
+    _elements.copyBtn = document.getElementById('copyFilterBtn');
+    
+    // Bind events
+    _bindEvents();
+    
+    _initialized = true;
+    console.log('[WiresharkHelper] ✅ Initialized');
+}
+
+// ============================================================================
+// EVENT BINDING
+// ============================================================================
+
+function _bindEvents() {
+    _elements.copyBtn?.addEventListener('click', _copyFilter);
+}
+
+/**
+ * Copy Wireshark filter to clipboard
+ */
+async function _copyFilter() {
+    const filterText = _elements.filter?.textContent || 'eth.type == 0x88ba';
+    
+    try {
+        await navigator.clipboard.writeText(filterText);
+        showToast('Filter copied to clipboard!', 'success');
+        
+        // Visual feedback
+        if (_elements.copyBtn) {
+            const originalText = _elements.copyBtn.textContent;
+            _elements.copyBtn.textContent = '✓ Copied!';
+            setTimeout(() => {
+                _elements.copyBtn.textContent = originalText;
+            }, 1500);
+        }
+    } catch (err) {
+        console.error('[WiresharkHelper] Failed to copy:', err);
+        showToast('Failed to copy filter', 'error');
+    }
+}
+
+// ============================================================================
+// PUBLIC API
+// ============================================================================
+
+export const WiresharkHelper = {
+    init,
+    getTemplate
+};
+
+export default WiresharkHelper;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-FrameViewer.html">FrameViewer</a></li><li><a href="module-app.html">app</a></li><li><a href="module-bindings.html">bindings</a></li><li><a href="module-components.html">components</a></li><li><a href="module-configManager.html">configManager</a></li><li><a href="module-copyFilter.html">copyFilter</a></li><li><a href="module-dragManager.html">dragManager</a></li><li><a href="module-embeddedMathEditor.html">embeddedMathEditor</a></li><li><a href="module-equationTemplates.html">equationTemplates</a></li><li><a href="module-expressionConverter.html">expressionConverter</a></li><li><a href="module-formatters.html">formatters</a></li><li><a href="module-keyboardShortcuts.html">keyboardShortcuts</a></li><li><a href="module-mathEvaluator.html">mathEvaluator</a></li><li><a href="module-mathLiveEditor.html">mathLiveEditor</a></li><li><a href="module-standards.html">standards</a></li><li><a href="module-store.html">store</a></li><li><a href="module-tauriClient.html">tauriClient</a></li><li><a href="module-toast.html">toast</a></li><li><a href="module-validators.html">validators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_copyFilter">_copyFilter</a></li><li><a href="global.html#_getDurationSettings">_getDurationSettings</a></li><li><a href="global.html#_hideTimerDisplay">_hideTimerDisplay</a></li><li><a href="global.html#_setupDragEvents">_setupDragEvents</a></li><li><a href="global.html#_showTimerDisplay">_showTimerDisplay</a></li><li><a href="global.html#_startStatusPolling">_startStatusPolling</a></li><li><a href="global.html#_stopStatusPolling">_stopStatusPolling</a></li><li><a href="global.html#_updateTimerText">_updateTimerText</a></li><li><a href="global.html#autoDetectMAC">autoDetectMAC</a></li><li><a href="global.html#bindEvents">bindEvents</a></li><li><a href="global.html#cacheElements">cacheElements</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#formatDuration">formatDuration</a></li><li><a href="global.html#formatNumber">formatNumber</a></li><li><a href="global.html#formatRate">formatRate</a></li><li><a href="global.html#getChannelsListHTML">getChannelsListHTML</a></li><li><a href="global.html#getDefaultColor">getDefaultColor</a></li><li><a href="global.html#handleQuickAdd">handleQuickAdd</a></li><li><a href="global.html#handleResetClick">handleResetClick</a></li><li><a href="global.html#handleStoreChange">handleStoreChange</a></li><li><a href="global.html#loadNetworkInterfaces">loadNetworkInterfaces</a></li><li><a href="global.html#rebuildSamplesPerCycleDropdown">rebuildSamplesPerCycleDropdown</a></li><li><a href="global.html#resetStatsDisplay">resetStatsDisplay</a></li><li><a href="global.html#setupStoreSubscriptions">setupStoreSubscriptions</a></li><li><a href="global.html#syncFromStore">syncFromStore</a></li><li><a href="global.html#syncToServer">syncToServer</a></li><li><a href="global.html#updateSampleRate">updateSampleRate</a></li><li><a href="global.html#updateStandard">updateStandard</a></li><li><a href="global.html#updateStatsDisplay">updateStatsDisplay</a></li><li><a href="global.html#validateMAC">validateMAC</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 05 2026 21:30:19 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

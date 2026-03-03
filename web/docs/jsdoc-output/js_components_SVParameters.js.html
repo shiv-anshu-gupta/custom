@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: js/components/SVParameters.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: js/components/SVParameters.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module SVParameters
+ * @file modules/SVParameters.js
+ * @description SV Parameters Module for stream configuration.
+ * Handles DOM elements and syncs with the store.
+ * 
+ * @author SV-PUB Team
+ * @date 2025
+ */
+
+import store from '../store/index.js';
+import { showToast } from '../plugins/toast.js';
+
+// ============================================================================
+// MODULE STATE
+// ============================================================================
+
+let initialized = false;
+const elements = {};
+
+// Sample rate labels for dropdown
+const SAMPLE_LABELS = {
+    80: '80 (Protection)',
+    96: '96 (Alternative)',
+    256: '256 (Metering)',
+    512: '512',
+    1024: '1024',
+    2048: '2048',
+    4000: '4000 (Power Quality)',
+    4800: '4800'
+};
+
+// ============================================================================
+// DOM TEMPLATE
+// ============================================================================
+
+/**
+ * Get the HTML template for this module
+ * @memberof module:SVParameters
+ * @returns {string} HTML template string
+ */
+export function getTemplate() {
+    return `
+        &lt;section class="card" id="sv-parameters-module">
+            &lt;div class="card-header">
+                &lt;h2>SV Parameters&lt;/h2>
+            &lt;/div>
+            &lt;div class="card-body">
+                &lt;div class="form-grid">
+                    &lt;div class="form-group">
+                        &lt;label for="svId">svID&lt;/label>
+                        &lt;input type="text" id="svId" value="MU01" placeholder="MU01">
+                        &lt;span class="input-hint">Stream identifier (max 65 chars)&lt;/span>
+                    &lt;/div>
+                    &lt;div class="form-group">
+                        &lt;label for="datSet">datSet (Optional)&lt;/label>
+                        &lt;input type="text" id="datSet" placeholder="Optional for 9-2 LE">
+                        &lt;span class="input-hint">Dataset reference&lt;/span>
+                    &lt;/div>
+                    &lt;div class="form-group">
+                        &lt;label for="frequency">System Frequency&lt;/label>
+                        &lt;select id="frequency">
+                            &lt;option value="50">50 Hz (Europe, Asia)&lt;/option>
+                            &lt;option value="60" selected>60 Hz (North America)&lt;/option>
+                        &lt;/select>
+                        &lt;span class="input-hint">Power system frequency&lt;/span>
+                    &lt;/div>
+                    &lt;div class="form-group">
+                        &lt;label for="samplesPerCycleSelect">Samples per Cycle&lt;/label>
+                        &lt;div class="samples-per-cycle-wrapper">
+                            &lt;select id="samplesPerCycleSelect">
+                                &lt;option value="80" selected>80 (Protection)&lt;/option>
+                                &lt;option value="256">256 (Metering)&lt;/option>
+                            &lt;/select>
+                            &lt;input type="number" id="samplesPerCycleInput" value="80" min="1" max="10000" class="hidden" placeholder="Custom">
+                        &lt;/div>
+                        &lt;span class="input-hint" id="samplesPerCycleHint">Fixed for IEC 9-2LE&lt;/span>
+                    &lt;/div>
+                    &lt;div class="form-group">
+                        &lt;label for="smpRate">Sample Rate&lt;/label>
+                        &lt;div class="input-with-unit">
+                            &lt;input type="number" id="smpRate" value="4800" placeholder="4800" readonly>
+                            &lt;span class="unit">smp/s&lt;/span>
+                        &lt;/div>
+                        &lt;span class="input-hint" id="smpRateHint">= &lt;span id="smpRateFormula">80 × 60&lt;/span> Hz&lt;/span>
+                    &lt;/div>
+                    &lt;div class="form-group">
+                        &lt;label for="confRev">confRev&lt;/label>
+                        &lt;input type="number" id="confRev" value="1" min="1" placeholder="1">
+                        &lt;span class="input-hint">Configuration revision&lt;/span>
+                    &lt;/div>
+                    &lt;div class="form-group">
+                        &lt;label for="smpSynch">smpSynch&lt;/label>
+                        &lt;select id="smpSynch">
+                            &lt;option value="0">0 - Not Synchronized&lt;/option>
+                            &lt;option value="1">1 - Local Sync&lt;/option>
+                            &lt;option value="2" selected>2 - Global Sync (GPS)&lt;/option>
+                        &lt;/select>
+                        &lt;span class="input-hint">Time sync status&lt;/span>
+                    &lt;/div>
+                &lt;/div>
+            &lt;/div>
+        &lt;/section>
+    `;
+}
+
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+
+/**
+ * Initialize the module
+ * @memberof module:SVParameters
+ * @param {HTMLElement} container - Container element to render into (optional)
+ */
+export function init(container = null) {
+    if (initialized) {
+        console.warn('[SVParameters] Already initialized');
+        return;
+    }
+
+    // If container provided, inject template
+    if (container) {
+        container.innerHTML = getTemplate();
+    }
+
+    // Cache DOM elements
+    elements.svId = document.getElementById('svId');
+    elements.datSet = document.getElementById('datSet');
+    elements.frequency = document.getElementById('frequency');
+    elements.samplesPerCycleSelect = document.getElementById('samplesPerCycleSelect');
+    elements.samplesPerCycleInput = document.getElementById('samplesPerCycleInput');
+    elements.samplesPerCycleHint = document.getElementById('samplesPerCycleHint');
+    elements.smpRate = document.getElementById('smpRate');
+    elements.smpRateFormula = document.getElementById('smpRateFormula');
+    elements.confRev = document.getElementById('confRev');
+    elements.smpSynch = document.getElementById('smpSynch');
+
+    // Bind events
+    bindEvents();
+
+    // Build the samples per cycle dropdown for current standard
+    rebuildSamplesPerCycleDropdown();
+
+    // Set initial values from store
+    syncFromStore();
+
+    // Subscribe to store changes
+    store.subscribe([
+        'config.svID',
+        'config.frequency',
+        'config.samplesPerCycle',
+        'config.sampleRate',
+        'config.confRev',
+        'config.smpSynch',
+        'config.standard',
+        'config.standardConfig'
+    ], handleStoreChange);
+
+    initialized = true;
+    console.log('[SVParameters] Initialized');
+}
+
+// ============================================================================
+// EVENT BINDING
+// ============================================================================
+
+function bindEvents() {
+    // svID change
+    elements.svId?.addEventListener('change', (e) => {
+        const value = e.target.value.trim().slice(0, 65); // Max 65 chars
+        store.setConfig({ svID: value || 'MU01' });
+        e.target.value = store.config.svID;
+    });
+
+    // Frequency change
+    elements.frequency?.addEventListener('change', (e) => {
+        const freq = parseInt(e.target.value) || 60;
+        store.setConfig({ frequency: freq });
+        // Sample rate auto-updates via store
+    });
+
+    // Samples per cycle dropdown
+    elements.samplesPerCycleSelect?.addEventListener('change', (e) => {
+        const value = e.target.value;
+        if (value === 'custom') {
+            // Show custom input
+            elements.samplesPerCycleInput?.classList.remove('hidden');
+            elements.samplesPerCycleInput?.focus();
+        } else {
+            const spc = parseInt(value) || 80;
+            store.setConfig({ samplesPerCycle: spc });
+            elements.samplesPerCycleInput?.classList.add('hidden');
+        }
+    });
+
+    // Samples per cycle custom input
+    elements.samplesPerCycleInput?.addEventListener('change', (e) => {
+        const value = parseInt(e.target.value);
+        if (value &amp;&amp; value > 0) {
+            store.setConfig({ samplesPerCycle: value });
+        } else {
+            showToast('Samples per cycle must be 1-10000', 'error');
+            e.target.value = store.config.samplesPerCycle;
+        }
+    });
+
+    // confRev change
+    elements.confRev?.addEventListener('change', (e) => {
+        const value = parseInt(e.target.value) || 1;
+        store.setConfig({ confRev: Math.max(1, value) });
+        e.target.value = store.config.confRev;
+    });
+
+    // smpSynch change
+    elements.smpSynch?.addEventListener('change', (e) => {
+        store.setConfig({ smpSynch: parseInt(e.target.value) || 0 });
+    });
+}
+
+// ============================================================================
+// STORE SYNC
+// ============================================================================
+
+/**
+ * Handle store changes
+ */
+function handleStoreChange(value, path) {
+    if (path === 'config.standard' || path === 'config.standardConfig') {
+        rebuildSamplesPerCycleDropdown();
+    }
+    syncFromStore();
+}
+
+/**
+ * Sync UI from store
+ */
+function syncFromStore() {
+    if (elements.svId) {
+        elements.svId.value = store.config.svID;
+    }
+    if (elements.frequency) {
+        elements.frequency.value = store.config.frequency;
+    }
+    if (elements.smpRate) {
+        elements.smpRate.value = store.config.sampleRate;
+    }
+    if (elements.smpRateFormula) {
+        elements.smpRateFormula.textContent = `${store.config.samplesPerCycle} × ${store.config.frequency}`;
+    }
+    if (elements.confRev) {
+        elements.confRev.value = store.config.confRev;
+    }
+    if (elements.smpSynch) {
+        elements.smpSynch.value = store.config.smpSynch;
+    }
+    
+    // Update samples per cycle dropdown value
+    if (elements.samplesPerCycleSelect) {
+        const currentValue = store.config.samplesPerCycle.toString();
+        const options = Array.from(elements.samplesPerCycleSelect.options);
+        const hasOption = options.some(opt => opt.value === currentValue);
+        
+        if (hasOption) {
+            elements.samplesPerCycleSelect.value = currentValue;
+            elements.samplesPerCycleInput?.classList.add('hidden');
+        }
+    }
+}
+
+/**
+ * Rebuild samples per cycle dropdown based on current standard
+ */
+function rebuildSamplesPerCycleDropdown() {
+    if (!elements.samplesPerCycleSelect) {
+        return;
+    }
+
+    const config = store.config.standardConfig;
+    if (!config) return;
+
+    const allowedValues = config.allowedSamplesPerCycle || [80, 256];
+    const canCustom = !config.fixedSamplesPerCycle;
+    let currentValue = store.config.samplesPerCycle;
+
+    // Ensure current value is valid for this standard
+    if (!allowedValues.includes(currentValue) &amp;&amp; !canCustom) {
+        currentValue = config.defaultSamplesPerCycle || allowedValues[0];
+        store.setConfig({ samplesPerCycle: currentValue });
+    }
+
+    // Clear and rebuild options
+    elements.samplesPerCycleSelect.innerHTML = '';
+
+    allowedValues.forEach(val => {
+        const option = document.createElement('option');
+        option.value = val;
+        option.textContent = SAMPLE_LABELS[val] || val.toString();
+        if (val === currentValue) option.selected = true;
+        elements.samplesPerCycleSelect.appendChild(option);
+    });
+
+    // Add custom option for flexible standards
+    if (canCustom) {
+        const customOption = document.createElement('option');
+        customOption.value = 'custom';
+        customOption.textContent = 'Custom...';
+        elements.samplesPerCycleSelect.appendChild(customOption);
+    }
+
+    // Update hint text
+    if (elements.samplesPerCycleHint) {
+        if (config.fixedSamplesPerCycle) {
+            elements.samplesPerCycleHint.textContent = `Fixed for ${config.name}`;
+            elements.samplesPerCycleHint.classList.add('hint-locked');
+        } else {
+            elements.samplesPerCycleHint.textContent = `Flexible for ${config.name} - custom values allowed`;
+            elements.samplesPerCycleHint.classList.remove('hint-locked');
+        }
+    }
+
+    // Hide custom input
+    if (elements.samplesPerCycleInput) {
+        elements.samplesPerCycleInput.classList.add('hidden');
+        elements.samplesPerCycleInput.value = currentValue;
+    }
+
+}
+
+
+// ============================================================================
+// PUBLIC API
+// ============================================================================
+
+/**
+ * Get current SV parameters
+ * @memberof module:SVParameters
+ * @returns {Object} SV parameters object
+ */
+export function getParameters() {
+    return {
+        svID: store.config.svID,
+        frequency: store.config.frequency,
+        samplesPerCycle: store.config.samplesPerCycle,
+        sampleRate: store.config.sampleRate,
+        confRev: store.config.confRev,
+        smpSynch: store.config.smpSynch
+    };
+}
+
+/**
+ * Get sample rate
+ * @memberof module:SVParameters
+ * @returns {number} Sample rate
+ */
+export function getSampleRate() {
+    return store.config.sampleRate;
+}
+
+/**
+ * Destroy module (cleanup)
+ * @memberof module:SVParameters
+ */
+export function destroy() {
+    initialized = false;
+}
+
+// ============================================================================
+// DEFAULT EXPORT
+// ============================================================================
+
+export default {
+    init,
+    getTemplate,
+    getParameters,
+    getSampleRate,
+    destroy
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-FrameViewer.html">FrameViewer</a></li><li><a href="module-app.html">app</a></li><li><a href="module-bindings.html">bindings</a></li><li><a href="module-components.html">components</a></li><li><a href="module-configManager.html">configManager</a></li><li><a href="module-copyFilter.html">copyFilter</a></li><li><a href="module-dragManager.html">dragManager</a></li><li><a href="module-embeddedMathEditor.html">embeddedMathEditor</a></li><li><a href="module-equationTemplates.html">equationTemplates</a></li><li><a href="module-expressionConverter.html">expressionConverter</a></li><li><a href="module-formatters.html">formatters</a></li><li><a href="module-keyboardShortcuts.html">keyboardShortcuts</a></li><li><a href="module-mathEvaluator.html">mathEvaluator</a></li><li><a href="module-mathLiveEditor.html">mathLiveEditor</a></li><li><a href="module-standards.html">standards</a></li><li><a href="module-store.html">store</a></li><li><a href="module-tauriClient.html">tauriClient</a></li><li><a href="module-toast.html">toast</a></li><li><a href="module-validators.html">validators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_copyFilter">_copyFilter</a></li><li><a href="global.html#_getDurationSettings">_getDurationSettings</a></li><li><a href="global.html#_hideTimerDisplay">_hideTimerDisplay</a></li><li><a href="global.html#_setupDragEvents">_setupDragEvents</a></li><li><a href="global.html#_showTimerDisplay">_showTimerDisplay</a></li><li><a href="global.html#_startStatusPolling">_startStatusPolling</a></li><li><a href="global.html#_stopStatusPolling">_stopStatusPolling</a></li><li><a href="global.html#_updateTimerText">_updateTimerText</a></li><li><a href="global.html#autoDetectMAC">autoDetectMAC</a></li><li><a href="global.html#bindEvents">bindEvents</a></li><li><a href="global.html#cacheElements">cacheElements</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#formatDuration">formatDuration</a></li><li><a href="global.html#formatNumber">formatNumber</a></li><li><a href="global.html#formatRate">formatRate</a></li><li><a href="global.html#getChannelsListHTML">getChannelsListHTML</a></li><li><a href="global.html#getDefaultColor">getDefaultColor</a></li><li><a href="global.html#handleQuickAdd">handleQuickAdd</a></li><li><a href="global.html#handleResetClick">handleResetClick</a></li><li><a href="global.html#handleStoreChange">handleStoreChange</a></li><li><a href="global.html#loadNetworkInterfaces">loadNetworkInterfaces</a></li><li><a href="global.html#rebuildSamplesPerCycleDropdown">rebuildSamplesPerCycleDropdown</a></li><li><a href="global.html#resetStatsDisplay">resetStatsDisplay</a></li><li><a href="global.html#setupStoreSubscriptions">setupStoreSubscriptions</a></li><li><a href="global.html#syncFromStore">syncFromStore</a></li><li><a href="global.html#syncToServer">syncToServer</a></li><li><a href="global.html#updateSampleRate">updateSampleRate</a></li><li><a href="global.html#updateStandard">updateStandard</a></li><li><a href="global.html#updateStatsDisplay">updateStatsDisplay</a></li><li><a href="global.html#validateMAC">validateMAC</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 05 2026 21:30:19 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

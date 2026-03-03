@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: js/utils/tauriClient.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: js/utils/tauriClient.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file tauriClient.js
+ * @fileoverview Tauri Backend Communication Client
+ * @module tauriClient
+ * @author SV-PUB Team
+ * @description
+ * Provides communication with the Tauri/Rust backend using invoke() API.
+ * Replaces WebSocket-based communication for desktop app version.
+ * 
+ * **Features:**
+ * - Direct Rust command invocation
+ * - Event-based communication with multiple listeners
+ * - Automatic stats polling during publishing
+ * - Publishing state detection
+ * 
+ * **Events:**
+ * | Event | Data | Description |
+ * |-------|------|-------------|
+ * | connect | - | Backend connected |
+ * | disconnect | - | Backend disconnected |
+ * | stats | {packetsSent, ...} | Real-time statistics |
+ * | status | {isPublishing} | Publishing status |
+ * | error | {message} | Error occurred |
+ * | publishingStopped | - | Publishing ended |
+ * 
+ * @example
+ * import * as tauriClient from './utils/tauriClient.js';
+ * await tauriClient.connect();
+ * tauriClient.on('stats', (stats) => console.log(stats));
+ * await tauriClient.startPublishing(config);
+ */
+
+/** @private */
+const getTauriInvoke = () => {
+    // Tauri 2.x uses window.__TAURI__.core.invoke
+    if (window.__TAURI__?.core?.invoke) {
+        return window.__TAURI__.core.invoke;
+    }
+    // Tauri 1.x fallback
+    if (window.__TAURI__?.invoke) {
+        return window.__TAURI__.invoke;
+    }
+    console.error('[tauriClient] window.__TAURI__ =', window.__TAURI__);
+    throw new Error('Tauri not available');
+};
+
+/** @private */
+const invoke = async (cmd, args) => {
+    const fn = getTauriInvoke();
+    return await fn(cmd, args);
+};
+
+/** @private */
+const handlers = {
+    connect: [],
+    disconnect: [],
+    stats: [],
+    status: [],
+    error: [],
+    init: [],
+    publishingStopped: []
+};
+
+/** @private */
+function emit(event, data) {
+    const listeners = handlers[event];
+    if (listeners &amp;&amp; listeners.length > 0) {
+        listeners.forEach(fn => {
+            try { fn(data); } catch (e) { console.error(`[tauriClient] Handler error for ${event}:`, e); }
+        });
+    }
+}
+
+/** @private */
+let _isConnected = false;
+/** @private */
+let statsInterval = null;
+
+/**
+ * Connect to Tauri backend
+ * @memberof module:tauriClient
+ * @async
+ * @returns {Promise&lt;void>}
+ * @fires connect - When connection successful
+ * @fires error - When connection fails
+ */
+export async function connect() {
+    try {
+        console.log('[tauriClient] Connecting to Tauri backend...');
+        
+        // Check if native is available
+        const available = await invoke('is_native_available');
+        console.log('[tauriClient] Native available:', available);
+        
+        if (available) {
+            _isConnected = true;
+            emit('connect');
+            
+            // Get initial state
+            const state = await invoke('get_initial_state');
+            console.log('[tauriClient] Initial state:', state);
+            emit('init', state);
+            
+            // Start stats polling
+            startStatsPolling();
+            
+            console.log('[tauriClient] ✅ Connected to Tauri backend');
+        } else {
+            throw new Error('Native module not available');
+        }
+    } catch (err) {
+        console.error('[tauriClient] Connection failed:', err);
+        emit('error', { message: err.message || 'Connection failed' });
+    }
+}
+
+/** @private */
+let wasPublishing = false;
+
+/**
+ * Start polling for stats every 250ms
+ * @private
+ */
+function startStatsPolling() {
+    if (statsInterval) return;
+    
+    statsInterval = setInterval(async () => {
+        try {
+            const status = await invoke('get_publish_status');
+            
+            if (status.isPublishing) {
+                wasPublishing = true;
+                const stats = await invoke('get_stats');
+                console.log('[tauriClient] Stats:', stats);
+                emit('stats', stats);
+                
+                // Check if backend reports duration complete (should stop soon)
+                if (stats.durationComplete) {
+                    console.log('[tauriClient] 📍 Duration elapsed, backend stopping...');
+                }
+            } else if (wasPublishing) {
+                // Publishing just stopped! Fetch final stats and emit stop event
+                wasPublishing = false;
+                
+                const stats = await invoke('get_stats');
+                console.log('[tauriClient] 🛑 Publishing stopped. Final stats:', stats);
+                
+                // Emit final stats
+                emit('stats', stats);
+                
+                // Emit stop event so UI can update
+                console.log('[tauriClient] 📢 Emitting publishingStopped event...');
+                emit('publishingStopped', {
+                    reason: stats.durationComplete ? 'duration_elapsed' : 'user_stopped',
+                    stats: stats
+                });
+                console.log('[tauriClient] ✅ publishingStopped event emitted');
+            }
+        } catch (err) {
+            // Ignore polling errors
+        }
+    }, 250);
+}
+
+/**
+ * Stop stats polling
+ * @private
+ */
+function stopStatsPolling() {
+    if (statsInterval) {
+        clearInterval(statsInterval);
+        statsInterval = null;
+    }
+}
+
+/**
+ * Disconnect from backend
+ * @memberof module:tauriClient
+ */
+export function disconnect() {
+    _isConnected = false;
+    stopStatsPolling();
+    emit('disconnect');
+}
+
+/**
+ * Check if connected to backend
+ * @memberof module:tauriClient
+ * @returns {boolean} Connection state
+ */
+export function isConnected() {
+    return _isConnected;
+}
+
+/**
+ * Register event handler (supports multiple listeners per event)
+ * @memberof module:tauriClient
+ * @param {string} event - Event name (connect, disconnect, stats, status, error, publishingStopped)
+ * @param {Function} handler - Callback function
+ */
+export function on(event, handler) {
+    if (handlers.hasOwnProperty(event)) {
+        handlers[event].push(handler);
+        console.log(`[tauriClient] Registered handler for '${event}' (${handlers[event].length} total)`);
+    } else {
+        console.warn(`[tauriClient] Unknown event: ${event}`);
+    }
+}
+
+// ============================================================================
+// INTERFACE COMMANDS
+// ============================================================================
+
+/**
+ * Get list of available network interfaces
+ * @memberof module:tauriClient
+ * @async
+ * @returns {Promise&lt;Array>} Array of interface objects
+ */
+export async function getInterfaces() {
+    return await invoke('get_interfaces');
+}
+
+/**
+ * Open a network interface for publishing
+ * @memberof module:tauriClient
+ * @async
+ * @param {string} name - Interface name
+ * @returns {Promise&lt;void>}
+ */
+export async function openInterface(name) {
+    return await invoke('open_interface', { name });
+}
+
+/**
+ * Close the currently open interface
+ * @memberof module:tauriClient
+ * @async
+ * @returns {Promise&lt;void>}
+ */
+export async function closeInterface() {
+    return await invoke('close_interface');
+}
+
+/**
+ * Check if an interface is currently open
+ * @memberof module:tauriClient
+ * @async
+ * @returns {Promise&lt;boolean>}
+ */
+export async function isInterfaceOpen() {
+    return await invoke('is_interface_open');
+}
+
+// ============================================================================
+// PUBLISHING COMMANDS
+// ============================================================================
+
+/**
+ * Set duration and repeat mode (BACKEND CONTROLLED - NOT JS TIMER!)
+ * All timing happens in C++, ensuring accuracy and security.
+ * @memberof module:tauriClient
+ * @async
+ * @param {Object} settings - Duration settings
+ * @param {number} settings.durationSeconds - Duration in seconds
+ * @param {boolean} settings.repeatEnabled - Enable repeat mode
+ * @param {boolean} settings.repeatInfinite - Infinite repeat
+ * @param {number} settings.repeatCount - Number of repeats
+ * @returns {Promise&lt;void>}
+ */
+export async function setDurationMode(settings) {
+    console.log('[tauriClient] ⏱️ Setting duration mode (BACKEND CONTROLLED):', settings);
+    return await invoke('set_duration_mode', { settings });
+}
+
+/**
+ * Get remaining seconds from C++ backend
+ * @memberof module:tauriClient
+ * @async
+ * @returns {Promise&lt;number>} Remaining seconds
+ */
+export async function getRemainingSeconds() {
+    return await invoke('get_remaining_seconds');
+}
+
+/**
+ * Get current repeat cycle from C++ backend
+ * @memberof module:tauriClient
+ * @async
+ * @returns {Promise&lt;number>} Current cycle number
+ */
+export async function getCurrentRepeatCycle() {
+    return await invoke('get_current_repeat_cycle');
+}
+
+/**
+ * Check if duration completed in C++ backend
+ * @memberof module:tauriClient
+ * @async
+ * @returns {Promise&lt;boolean>}
+ */
+export async function isDurationComplete() {
+    return await invoke('is_duration_complete');
+}
+
+/**
+ * Start SV publishing
+ * @memberof module:tauriClient
+ * @async
+ * @param {number} [duration=0] - Duration in seconds (0 for infinite)
+ * @param {Object} [options={}] - Options
+ * @param {number} [options.interfaceIndex] - Interface index to use
+ * @returns {Promise&lt;{success: boolean, error?: string}>}
+ */
+export async function start(duration = 0, options = {}) {
+    try {
+        // Open interface if needed
+        const isOpen = await invoke('is_interface_open');
+        
+        if (!isOpen &amp;&amp; options.interfaceIndex !== undefined) {
+            const interfaces = await invoke('get_interfaces');
+            const iface = interfaces[options.interfaceIndex];
+            if (iface) {
+                console.log('[tauriClient] Opening interface:', iface.name);
+                await invoke('open_interface', { name: iface.name });
+            }
+        }
+        
+        // Start publishing
+        await invoke('start_publishing');
+        
+        emit('status', { status: 'running' });
+        return { success: true };
+    } catch (err) {
+        console.error('[tauriClient] Start failed:', err);
+        emit('error', { message: err });
+        return { success: false, error: err };
+    }
+}
+
+/**
+ * Stop SV publishing
+ * @memberof module:tauriClient
+ * @async
+ * @returns {Promise&lt;{success: boolean, error?: string}>}
+ */
+export async function stop() {
+    try {
+        await invoke('stop_publishing');
+        emit('status', { status: 'stopped' });
+        return { success: true };
+    } catch (err) {
+        console.error('[tauriClient] Stop failed:', err);
+        return { success: false, error: err };
+    }
+}
+
+// ============================================================================
+// CONFIG COMMANDS
+// ============================================================================
+
+/**
+ * Get current configuration from backend
+ * @memberof module:tauriClient
+ * @async
+ * @returns {Promise&lt;Object>} Configuration object
+ */
+export async function getConfig() {
+    return await invoke('get_config');
+}
+
+/**
+ * Update config only (backward compatibility)
+ * @memberof module:tauriClient
+ * @async
+ * @param {Object} config - Configuration object
+ * @returns {Promise&lt;void>}
+ */
+export async function updateConfig(config) {
+    console.log('[tauriClient] Sending config to Rust:', config);
+    return await invoke('set_config', { config });
+}
+
+/**
+ * Send complete data (config + channels) to backend
+ * @memberof module:tauriClient
+ * @async
+ * @param {Object} data - Complete data object
+ * @param {Object} data.config - Configuration
+ * @param {Array} data.channels - Channel array
+ * @param {Object} [data.meta] - Optional metadata
+ * @returns {Promise&lt;{success: boolean}>}
+ */
+export async function updateData(data) {
+    console.log('==========================================');
+    console.log('[tauriClient] updateData() CALLED');
+    console.log('[tauriClient] Config keys:', Object.keys(data.config || {}));
+    console.log('[tauriClient] Config svId:', data.config?.svId);
+    console.log('[tauriClient] Channels count:', data.channels?.length);
+    console.log('==========================================');
+    
+    try {
+        // Send config first
+        console.log('[tauriClient] Step 1: Sending config...');
+        console.log('[tauriClient] Config object:', JSON.stringify(data.config, null, 2));
+        await invoke('set_config', { config: data.config });
+        console.log('[tauriClient] ✅ Config sent successfully');
+        
+        // Send channels/equations to backend
+        if (data.channels &amp;&amp; data.channels.length > 0) {
+            console.log('[tauriClient] Step 2: Sending', data.channels.length, 'channels...');
+            console.log('[tauriClient] Channel IDs:', data.channels.map(c => c.id).join(', '));
+            await invoke('set_channels', { channels: data.channels });
+            console.log('[tauriClient] ✅ Channels sent successfully');
+        } else {
+            console.warn('[tauriClient] ⚠️ No channels to send!');
+        }
+        
+        return { success: true };
+    } catch (err) {
+        console.error('[tauriClient] ❌ Error sending data:', err);
+        throw err;
+    }
+}
+
+// ============================================================================
+// STATS COMMANDS
+// ============================================================================
+
+/**
+ * Get current publishing statistics
+ * @memberof module:tauriClient
+ * @async
+ * @returns {Promise&lt;Object>} Statistics object
+ */
+export async function getStats() {
+    return await invoke('get_stats');
+}
+
+/**
+ * Reset statistics counters
+ * @memberof module:tauriClient
+ * @async
+ * @returns {Promise&lt;void>}
+ */
+export async function resetStats() {
+    return await invoke('reset_stats');
+}
+
+// ============================================================================
+// CHANNEL/EQUATION COMMANDS
+// ============================================================================
+
+/**
+ * Update channels with equations
+ * @memberof module:tauriClient
+ * @async
+ * @param {Array} channels - Array of channel objects
+ * @param {string} channels[].id - Channel ID
+ * @param {string} channels[].equation - Math expression
+ * @param {string} channels[].type - Channel type (voltage/current)
+ * @param {boolean} channels[].isBase - Is base channel
+ * @returns {Promise&lt;{success: boolean}>}
+ */
+export async function updateChannels(channels) {
+    console.log('[tauriClient] Updating channels:', channels.length);
+    return { success: true };
+}
+
+/**
+ * @memberof module:tauriClient
+ * @deprecated Use updateChannels instead
+ * @async
+ * @param {Object} equations - Equations object
+ * @returns {Promise&lt;{success: boolean}>}
+ */
+export async function updateEquations(equations) {
+    console.log('[tauriClient] updateEquations (deprecated):', equations);
+    return { success: true };
+}
+
+// ============================================================================
+// GENERIC SEND (for compatibility)
+// ============================================================================
+
+/**
+ * Generic message sender (for backward compatibility)
+ * @memberof module:tauriClient
+ * @async
+ * @param {Object} message - Message object with type property
+ */
+export async function send(message) {
+    console.log('[tauriClient] Generic send:', message);
+    
+    if (message.type === 'pcap_replay') {
+        // TODO: Implement PCAP replay
+        console.log('[tauriClient] PCAP replay not yet implemented');
+        return;
+    }
+    
+    // Handle other message types as needed
+}
+
+// ============================================================================
+// DEFAULT EXPORT
+// ============================================================================
+
+export default {
+    connect,
+    disconnect,
+    isConnected,
+    on,
+    // Interface
+    getInterfaces,
+    openInterface,
+    closeInterface,
+    isInterfaceOpen,
+    // Publishing
+    start,
+    stop,
+    // Config &amp; Data
+    getConfig,
+    updateConfig,
+    updateData,       // ⭐ NEW: Send both config + channels
+    updateChannels,   // ⭐ NEW: Send channels only
+    // Stats
+    getStats,
+    resetStats,
+    // Equations (deprecated)
+    updateEquations,
+    // Generic
+    send,
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-FrameViewer.html">FrameViewer</a></li><li><a href="module-app.html">app</a></li><li><a href="module-bindings.html">bindings</a></li><li><a href="module-components.html">components</a></li><li><a href="module-configManager.html">configManager</a></li><li><a href="module-copyFilter.html">copyFilter</a></li><li><a href="module-dragManager.html">dragManager</a></li><li><a href="module-embeddedMathEditor.html">embeddedMathEditor</a></li><li><a href="module-equationTemplates.html">equationTemplates</a></li><li><a href="module-expressionConverter.html">expressionConverter</a></li><li><a href="module-formatters.html">formatters</a></li><li><a href="module-keyboardShortcuts.html">keyboardShortcuts</a></li><li><a href="module-mathEvaluator.html">mathEvaluator</a></li><li><a href="module-mathLiveEditor.html">mathLiveEditor</a></li><li><a href="module-standards.html">standards</a></li><li><a href="module-store.html">store</a></li><li><a href="module-tauriClient.html">tauriClient</a></li><li><a href="module-toast.html">toast</a></li><li><a href="module-validators.html">validators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_copyFilter">_copyFilter</a></li><li><a href="global.html#_getDurationSettings">_getDurationSettings</a></li><li><a href="global.html#_hideTimerDisplay">_hideTimerDisplay</a></li><li><a href="global.html#_setupDragEvents">_setupDragEvents</a></li><li><a href="global.html#_showTimerDisplay">_showTimerDisplay</a></li><li><a href="global.html#_startStatusPolling">_startStatusPolling</a></li><li><a href="global.html#_stopStatusPolling">_stopStatusPolling</a></li><li><a href="global.html#_updateTimerText">_updateTimerText</a></li><li><a href="global.html#autoDetectMAC">autoDetectMAC</a></li><li><a href="global.html#bindEvents">bindEvents</a></li><li><a href="global.html#cacheElements">cacheElements</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#formatDuration">formatDuration</a></li><li><a href="global.html#formatNumber">formatNumber</a></li><li><a href="global.html#formatRate">formatRate</a></li><li><a href="global.html#getChannelsListHTML">getChannelsListHTML</a></li><li><a href="global.html#getDefaultColor">getDefaultColor</a></li><li><a href="global.html#handleQuickAdd">handleQuickAdd</a></li><li><a href="global.html#handleResetClick">handleResetClick</a></li><li><a href="global.html#handleStoreChange">handleStoreChange</a></li><li><a href="global.html#loadNetworkInterfaces">loadNetworkInterfaces</a></li><li><a href="global.html#rebuildSamplesPerCycleDropdown">rebuildSamplesPerCycleDropdown</a></li><li><a href="global.html#resetStatsDisplay">resetStatsDisplay</a></li><li><a href="global.html#setupStoreSubscriptions">setupStoreSubscriptions</a></li><li><a href="global.html#syncFromStore">syncFromStore</a></li><li><a href="global.html#syncToServer">syncToServer</a></li><li><a href="global.html#updateSampleRate">updateSampleRate</a></li><li><a href="global.html#updateStandard">updateStandard</a></li><li><a href="global.html#updateStatsDisplay">updateStatsDisplay</a></li><li><a href="global.html#validateMAC">validateMAC</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 05 2026 21:30:19 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

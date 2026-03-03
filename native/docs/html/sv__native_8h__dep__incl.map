@@ -1,0 +1,22 @@
+<map id="sv_native.h" name="sv_native.h">
+<area shape="rect" id="Node000001" title="Header for Tauri FFI &#45; C interface for Rust." alt="" coords="328,5,417,32"/>
+<area shape="rect" id="Node000002" href="$npcap__transmitter_8h.html" title="Npcap Network Transmitter Module." alt="" coords="199,80,335,107"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="344,40,287,82,284,77,340,42"/>
+<area shape="rect" id="Node000006" href="$sv__native__refactored_8cc.html" title="SV Publisher &#45; Main Entry Point for Tauri FFI." alt="" coords="254,155,414,181"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="367,46,339,156,335,153,363,49"/>
+<area shape="rect" id="Node000007" href="$sv__stats_8h.html" title="Transmission Statistics Module." alt="" coords="450,80,532,107"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="406,38,473,79,468,79,405,43"/>
+<area shape="rect" id="Node000003" href="$npcap__transmitter__impl_8cc.html" title="Npcap Network Transmitter." alt="" coords="5,155,180,181"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="221,115,124,156,122,152,225,111"/>
+<area shape="rect" id="Node000004" href="$sv__controller_8cc.html" title="Implementation of SharedBuffer + SvController + Multi&#45;Publisher FFI." alt="" coords="434,229,548,256"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="251,118,238,152,238,166,244,180,256,190,274,199,323,214,437,236,432,236,321,219,272,204,253,194,240,183,233,167,233,150,247,122"/>
+<area shape="rect" id="Node000005" href="$sv__controller_8h.html" title="Main Controller + SharedBuffer for Multi&#45;Publisher SV System." alt="" coords="438,155,544,181"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="321,109,454,153,449,155,320,114"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="290,116,325,155,320,154,288,121"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="493,195,493,231,489,227,489,199"/>
+<area shape="poly" id="edge9_Node000007_Node000004" title=" " alt="" coords="525,113,545,132,559,154,561,177,550,198,533,217,513,231,511,226,529,213,546,195,556,176,554,156,540,135,523,119"/>
+<area shape="poly" id="edge10_Node000007_Node000005" title=" " alt="" coords="493,120,493,156,489,153,489,125"/>
+<area shape="poly" id="edge11_Node000007_Node000006" title=" " alt="" coords="453,113,362,157,360,152,447,114"/>
+<area shape="rect" id="Node000008" href="$sv__stats__impl_8cc.html" title="Transmission Statistics Tracker." alt="" coords="619,155,739,181"/>
+<area shape="poly" id="edge12_Node000007_Node000008" title=" " alt="" coords="538,110,649,154,643,154,538,115"/>
+</map>

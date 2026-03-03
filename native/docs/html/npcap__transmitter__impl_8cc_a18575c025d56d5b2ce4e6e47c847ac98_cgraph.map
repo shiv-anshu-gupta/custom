@@ -1,0 +1,5 @@
+<map id="npcap_list_interfaces" name="npcap_list_interfaces">
+<area shape="rect" id="Node000001" title="List available network interfaces." alt="" coords="5,5,150,32"/>
+<area shape="rect" id="Node000002" href="$npcap__transmitter__impl_8cc.html#a39ee732e324dd79ccb1fa45449572b35" title="Load Npcap DLL (Windows only)." alt="" coords="198,5,305,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,16,185,19,179,19,150,21"/>
+</map>

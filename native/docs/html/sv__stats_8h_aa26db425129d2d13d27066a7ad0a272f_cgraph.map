@@ -1,0 +1,5 @@
+<map id="npcap_stats_update_rates" name="npcap_stats_update_rates">
+<area shape="rect" id="Node000001" title="Update rate calculations (call periodically)." alt="" coords="5,5,144,48"/>
+<area shape="rect" id="Node000002" href="$sv__stats__impl_8cc.html#ae7cd346e20d4749f60fa7332dfae0dd7" title="Get current time in milliseconds." alt="" coords="192,13,366,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,24,179,26,173,27,144,29"/>
+</map>

@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: js/components/PublishPanel.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: js/components/PublishPanel.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module PublishPanel
+ * @file components/PublishPanel.js
+ * @description Publish Controls Module for Start/Stop publishing.
+ * Handles continuous/duration modes, ASDU count, and publish state.
+ * 
+ * @author SV-PUB Team
+ * @date 2025
+ */
+
+import store from '../store/index.js';
+import { showToast } from '../plugins/toast.js';
+import * as tauriClient from '../utils/tauriClient.js';
+import * as DataSource from './DataSource.js';
+
+// ============================================================================
+// MODULE STATE
+// ============================================================================
+
+let _initialized = false;
+let _isPublishing = false;
+let _isConnected = false;
+let _statusPollingInterval = null;  // Poll backend for duration/repeat status
+const _elements = {};
+
+// NOTE: Duration/Repeat timing is handled by C++ BACKEND, not JavaScript!
+// Frontend only displays status received from backend polling
+
+// ============================================================================
+// DOM TEMPLATE
+// ============================================================================
+
+/**
+ * Get the HTML template for publish controls
+ * @memberof module:PublishPanel
+ * @returns {string} HTML template string
+ */
+export function getTemplate() {
+    return `
+        &lt;section class="card publish-card" id="publish-panel-module">
+            &lt;div class="card-header">
+                &lt;h2>Publish&lt;/h2>
+            &lt;/div>
+            &lt;div class="card-body">
+                &lt;!-- Publishing Mode Selection -->
+                &lt;div class="publish-mode-section">
+                    &lt;label class="mode-label">Publishing Mode:&lt;/label>
+                    &lt;div class="mode-options">
+                        &lt;label class="mode-option">
+                            &lt;input type="radio" name="publishMode" value="continuous" checked>
+                            &lt;span class="mode-text">🔄 Continuous&lt;/span>
+                        &lt;/label>
+                        &lt;label class="mode-option">
+                            &lt;input type="radio" name="publishMode" value="duration">
+                            &lt;span class="mode-text">⏱️ Duration&lt;/span>
+                        &lt;/label>
+                    &lt;/div>
+                    &lt;div class="duration-input-group" id="durationInputGroup" style="display: none;">
+                        &lt;input type="number" id="publishDuration" min="1" max="3600" value="5" class="duration-input">
+                        &lt;select id="durationUnit" class="duration-unit">
+                            &lt;option value="1">seconds&lt;/option>
+                            &lt;option value="60">minutes&lt;/option>
+                        &lt;/select>
+                    &lt;/div>
+                    
+                    &lt;!-- Repeat Mode Section -->
+                    &lt;div class="repeat-mode-section" id="repeatModeSection" style="display: none;">
+                        &lt;div class="repeat-checkbox-row">
+                            &lt;label class="repeat-option">
+                                &lt;input type="checkbox" id="repeatEnabled">
+                                &lt;span class="repeat-text">🔁 Repeat&lt;/span>
+                            &lt;/label>
+                        &lt;/div>
+                        &lt;div class="repeat-options" id="repeatOptions" style="display: none;">
+                            &lt;div class="repeat-type-row">
+                                &lt;label class="repeat-type-option">
+                                    &lt;input type="radio" name="repeatType" value="infinite" checked>
+                                    &lt;span>♾️ Infinite Loop&lt;/span>
+                                &lt;/label>
+                                &lt;label class="repeat-type-option">
+                                    &lt;input type="radio" name="repeatType" value="count">
+                                    &lt;span>🔢 Fixed Count&lt;/span>
+                                &lt;/label>
+                            &lt;/div>
+                            &lt;div class="repeat-count-row" id="repeatCountRow" style="display: none;">
+                                &lt;label>Repeat:&lt;/label>
+                                &lt;input type="number" id="repeatCount" min="1" max="100" value="3" class="repeat-count-input">
+                                &lt;span>times&lt;/span>
+                            &lt;/div>
+                        &lt;/div>
+                    &lt;/div>
+                &lt;/div>
+                
+                &lt;div class="publish-buttons">
+                    &lt;button class="btn btn-success btn-large" id="startBtn">
+                        &lt;span class="icon">▶&lt;/span> START
+                    &lt;/button>
+                    &lt;button class="btn btn-danger btn-large" id="stopBtn" disabled>
+                        &lt;span class="icon">⏹&lt;/span> STOP
+                    &lt;/button>
+                &lt;/div>
+                &lt;div class="status-display">
+                    &lt;span class="status-dot ready">&lt;/span>
+                    &lt;span class="status-text">Ready&lt;/span>
+                &lt;/div>
+                &lt;div class="timer-display" id="timerDisplay" style="display: none;">
+                    &lt;span class="timer-icon">⏱️&lt;/span>
+                    &lt;span class="timer-text" id="timerText">5s remaining&lt;/span>
+                    &lt;span class="repeat-badge" id="repeatBadge" style="display: none;">Cycle 1/3&lt;/span>
+                &lt;/div>
+                &lt;div class="source-display">
+                    &lt;span>Source:&lt;/span>
+                    &lt;strong id="activeSource">Equation&lt;/strong>
+                &lt;/div>
+            &lt;/div>
+        &lt;/section>
+    `;
+}
+
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+
+/**
+ * Initialize the Publish Panel module
+ * @memberof module:PublishPanel
+ * @param {HTMLElement} container - Container element to inject template
+ */
+export function init(container) {
+    if (_initialized) {
+        console.warn('[PublishPanel] Already initialized');
+        return;
+    }
+    
+    console.log('[PublishPanel] Initializing...');
+    
+    // Inject template
+    container.innerHTML = getTemplate();
+    
+    // Cache elements
+    _elements.startBtn = document.getElementById('startBtn');
+    _elements.stopBtn = document.getElementById('stopBtn');
+    _elements.statusDot = container.querySelector('.status-dot');
+    _elements.statusText = container.querySelector('.status-text');
+    _elements.activeSource = document.getElementById('activeSource');
+    _elements.durationGroup = document.getElementById('durationInputGroup');
+    _elements.durationInput = document.getElementById('publishDuration');
+    _elements.durationUnit = document.getElementById('durationUnit');
+    _elements.repeatSection = document.getElementById('repeatModeSection');
+    _elements.repeatEnabled = document.getElementById('repeatEnabled');
+    _elements.repeatOptions = document.getElementById('repeatOptions');
+    _elements.repeatCountRow = document.getElementById('repeatCountRow');
+    _elements.repeatCountInput = document.getElementById('repeatCount');
+    _elements.timerDisplay = document.getElementById('timerDisplay');
+    _elements.timerText = document.getElementById('timerText');
+    _elements.repeatBadge = document.getElementById('repeatBadge');
+    
+    // Bind events
+    _bindEvents();
+    
+    // Setup Tauri handlers
+    _setupTauriHandlers();
+    
+    // Initialize from store
+    _initFromStore();
+    
+    _initialized = true;
+    console.log('[PublishPanel] ✅ Initialized');
+}
+
+// ============================================================================
+// EVENT BINDING
+// ============================================================================
+
+function _bindEvents() {
+    // Start/Stop buttons
+    _elements.startBtn?.addEventListener('click', startPublishing);
+    _elements.stopBtn?.addEventListener('click', stopPublishing);
+    
+    // Publishing mode toggle
+    const modeRadios = document.querySelectorAll('input[name="publishMode"]');
+    modeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const showDuration = e.target.value === 'duration';
+            if (_elements.durationGroup) {
+                _elements.durationGroup.style.display = showDuration ? 'flex' : 'none';
+            }
+            if (_elements.repeatSection) {
+                _elements.repeatSection.style.display = showDuration ? 'block' : 'none';
+            }
+        });
+    });
+    
+    // Repeat checkbox toggle
+    _elements.repeatEnabled?.addEventListener('change', (e) => {
+        if (_elements.repeatOptions) {
+            _elements.repeatOptions.style.display = e.target.checked ? 'block' : 'none';
+        }
+    });
+    
+    // Repeat type toggle (infinite vs fixed count)
+    const repeatTypeRadios = document.querySelectorAll('input[name="repeatType"]');
+    repeatTypeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (_elements.repeatCountRow) {
+                _elements.repeatCountRow.style.display = e.target.value === 'count' ? 'flex' : 'none';
+            }
+        });
+    });
+    
+    // Subscribe to data source changes
+    store.subscribe('data.activeTab', () => {
+        _updateSourceDisplay();
+    });
+}
+
+function _setupTauriHandlers() {
+    tauriClient.on('connect', () => {
+        _isConnected = true;
+        _updateStatus('ready', 'Ready');
+    });
+    
+    tauriClient.on('disconnect', () => {
+        _isConnected = false;
+        _updateStatus('disconnected', 'Disconnected');
+    });
+    
+    tauriClient.on('status', (data) => {
+        if (data.status === 'running') {
+            _isPublishing = true;
+            _updatePublishButtons(true);
+            _updateStatus('publishing', 'Publishing...');
+        } else if (data.status === 'stopped') {
+            _isPublishing = false;
+            _updatePublishButtons(false);
+            _updateStatus('ready', 'Stopped');
+        }
+    });
+    
+    tauriClient.on('init', (data) => {
+        _isPublishing = data.isPublishing;
+        _updatePublishButtons(data.isPublishing);
+        if (data.isPublishing) {
+            _updateStatus('publishing', 'Publishing...');
+        }
+    });
+    
+    tauriClient.on('error', (err) => {
+        _updateStatus('error', 'Error');
+        showToast(err.message || 'An error occurred', 'error');
+    });
+    
+    // Handle backend-controlled publishing stop (e.g., duration elapsed)
+    tauriClient.on('publishingStopped', (data) => {
+        console.log('[PublishPanel] 🛑 RECEIVED publishingStopped event:', data);
+        console.log('[PublishPanel] 🛑 Reason:', data.reason);
+        _isPublishing = false;
+        _updatePublishButtons(false);
+        
+        if (data.reason === 'duration_elapsed') {
+            _updateStatus('complete', 'Duration Complete');
+            showToast('Publishing completed - duration elapsed', 'success');
+        } else {
+            _updateStatus('ready', 'Stopped');
+        }
+        console.log('[PublishPanel] ✅ UI updated after publishingStopped');
+    });
+}
+
+function _initFromStore() {
+    // Set ASDU count from store
+    const noASDU = store.get('config.noASDU') || 1;
+    console.log('[PublishPanel] Initial noASDU from store:', noASDU);
+    if (_elements.asduSelect) {
+        _elements.asduSelect.value = noASDU;
+    }
+    
+    // Update source display
+    _updateSourceDisplay();
+}
+
+// ============================================================================
+// UI UPDATES
+// ============================================================================
+
+function _updatePublishButtons(isPublishing) {
+    if (_elements.startBtn) {
+        _elements.startBtn.disabled = isPublishing;
+    }
+    if (_elements.stopBtn) {
+        _elements.stopBtn.disabled = !isPublishing;
+    }
+}
+
+function _updateStatus(state, text) {
+    if (_elements.statusDot) {
+        _elements.statusDot.className = `status-dot ${state}`;
+    }
+    if (_elements.statusText) {
+        _elements.statusText.textContent = text;
+    }
+}
+
+function _updateSourceDisplay() {
+    const activeTab = store.get('data.activeTab') || 'equation';
+    if (_elements.activeSource) {
+        _elements.activeSource.textContent = activeTab === 'pcap' ? 'PCAP File' : 'Equation';
+    }
+}
+
+// ============================================================================
+// PUBLISHING ACTIONS (BACKEND CONTROLLED - NO JS TIMERS!)
+// ============================================================================
+
+/**
+ * Get duration settings from UI
+ * @returns {Object} { durationSeconds, repeatEnabled, repeatInfinite, repeatCount }
+ */
+function _getDurationSettings() {
+    const modeRadios = document.getElementsByName('publishMode');
+    let selectedMode = 'continuous';
+    
+    for (const radio of modeRadios) {
+        if (radio.checked) {
+            selectedMode = radio.value;
+            break;
+        }
+    }
+    
+    // Continuous mode = duration 0
+    if (selectedMode === 'continuous') {
+        return {
+            durationSeconds: 0,
+            repeatEnabled: false,
+            repeatInfinite: false,
+            repeatCount: 0
+        };
+    }
+    
+    // Duration mode
+    const value = parseInt(_elements.durationInput?.value) || 5;
+    const multiplier = parseInt(_elements.durationUnit?.value) || 1;
+    const durationSeconds = value * multiplier;
+    
+    // Repeat settings
+    const repeatEnabled = _elements.repeatEnabled?.checked || false;
+    let repeatInfinite = false;
+    let repeatCount = 0;
+    
+    if (repeatEnabled) {
+        const repeatTypeRadios = document.getElementsByName('repeatType');
+        let repeatType = 'infinite';
+        for (const radio of repeatTypeRadios) {
+            if (radio.checked) {
+                repeatType = radio.value;
+                break;
+            }
+        }
+        repeatInfinite = (repeatType === 'infinite');
+        repeatCount = repeatInfinite ? 0 : (parseInt(_elements.repeatCountInput?.value) || 3);
+    }
+    
+    return { durationSeconds, repeatEnabled, repeatInfinite, repeatCount };
+}
+
+/**
+ * Start publishing SV data
+ * @memberof module:PublishPanel
+ * @async
+ */
+export async function startPublishing() {
+    if (_isPublishing) return;
+    if (!_isConnected) {
+        showToast('Not connected to backend', 'error');
+        return;
+    }
+
+    const activeTab = DataSource.getActiveTab();
+
+    if (activeTab === 'pcap') {
+        if (!DataSource.isPcapLoaded()) {
+            showToast('Please load a PCAP file first', 'error');
+            return;
+        }
+    }
+
+    // Get COMPLETE data from store (config + channels)
+    const serverData = store.getDataForServer();
+    
+    // DEBUG: Log config being sent
+    console.log('╔════════════════════════════════════════════════════════════╗');
+    console.log('║  📤 CONFIG BEING SENT TO BACKEND                           ║');
+    console.log('╠════════════════════════════════════════════════════════════╣');
+    console.log('║  svId:', serverData.config.svId);
+    console.log('║  sampleRate:', serverData.config.sampleRate);
+    console.log('║  frequency:', serverData.config.frequency);
+    console.log('║  noAsdu:', serverData.config.noAsdu, '← ASDU per frame');
+    console.log('╚════════════════════════════════════════════════════════════╝');
+    
+    // DEBUG: Log equations being sent
+    console.log('╔════════════════════════════════════════════════════════════╗');
+    console.log('║  📤 EQUATIONS BEING SENT TO BACKEND                        ║');
+    console.log('╠════════════════════════════════════════════════════════════╣');
+    serverData.channels.forEach((ch, i) => {
+        console.log(`║  [${i}] ${ch.id.padEnd(8)} │ ${ch.equation.substring(0, 40).padEnd(40)} ║`);
+    });
+    console.log('╚════════════════════════════════════════════════════════════╝');
+    
+    // Send config and channels BEFORE starting
+    try {
+        console.log('⏳ Sending config and channels to backend...');
+        await tauriClient.updateData(serverData);
+        console.log('✅ Config and channels sent to backend successfully!');
+    } catch (err) {
+        console.error('❌ Failed to send config/channels:', err);
+        showToast('Failed to send configuration: ' + err.message, 'error');
+        return;
+    }
+
+    // Handle based on active tab
+    if (activeTab === 'pcap') {
+        // Start PCAP replay
+        const loopCheckbox = document.getElementById('loopPlayback');
+        const loop = loopCheckbox ? loopCheckbox.checked : false;
+        
+        const speedSelect = document.getElementById('playbackSpeed');
+        const syncMode = speedSelect ? parseInt(speedSelect.value) : 1;
+        
+        tauriClient.send({
+            type: 'pcap_replay',
+            data: {
+                loop: loop,
+                interfaceIndex: serverData.meta.interfaceIndex,
+                syncMode: syncMode
+            }
+        });
+        
+        showToast(syncMode === 0 ? 'Starting PCAP replay (max speed)...' : 'Starting PCAP replay (real-time)...', 'info');
+        
+    } else if (activeTab === 'equation') {
+        // ═══════════════════════════════════════════════════════════════════════════
+        // BACKEND-CONTROLLED DURATION/REPEAT
+        // All timing happens in C++, NOT JavaScript!
+        // ═══════════════════════════════════════════════════════════════════════════
+        
+        // Get duration settings from UI
+        const durationSettings = _getDurationSettings();
+        
+        console.log('╔════════════════════════════════════════════════════════════╗');
+        console.log('║  ⏱️ DURATION SETTINGS (Sending to C++ Backend!)            ║');
+        console.log('╠════════════════════════════════════════════════════════════╣');
+        console.log(`║  Duration: ${durationSettings.durationSeconds}s (${durationSettings.durationSeconds === 0 ? 'CONTINUOUS' : 'TIMED'})`);
+        console.log(`║  Repeat: ${durationSettings.repeatEnabled ? 'YES' : 'NO'}`);
+        if (durationSettings.repeatEnabled) {
+            console.log(`║  Mode: ${durationSettings.repeatInfinite ? 'INFINITE' : `${durationSettings.repeatCount} times`}`);
+        }
+        console.log('╚════════════════════════════════════════════════════════════╝');
+        
+        // Send duration mode to C++ backend BEFORE starting
+        try {
+            await tauriClient.setDurationMode(durationSettings);
+            console.log('✅ Duration settings sent to C++ backend');
+        } catch (err) {
+            console.error('❌ Failed to set duration mode:', err);
+            showToast('Failed to set duration mode: ' + err, 'error');
+            return;
+        }
+        
+        // Start publishing (C++ handles duration/repeat internally)
+        tauriClient.start(0, { interfaceIndex: serverData.meta.interfaceIndex });
+        
+        // Show timer display for timed mode
+        if (durationSettings.durationSeconds > 0) {
+            _showTimerDisplay();
+            _startStatusPolling(); // Poll backend for remaining time
+            
+            const repeatInfo = durationSettings.repeatEnabled 
+                ? (durationSettings.repeatInfinite ? ' (∞ repeat)' : ` (${durationSettings.repeatCount}x repeat)`)
+                : ' (one-time)';
+            showToast(`Publishing for ${durationSettings.durationSeconds}s${repeatInfo}...`, 'info');
+        }
+    }
+}
+
+/**
+ * Stop publishing SV data
+ * @memberof module:PublishPanel
+ */
+export function stopPublishing() {
+    if (!_isPublishing) return;
+    
+    // Stop status polling
+    _stopStatusPolling();
+    _hideTimerDisplay();
+    
+    tauriClient.stop();
+}
+
+/**
+ * Start polling backend for duration/repeat status
+ */
+function _startStatusPolling() {
+    _stopStatusPolling(); // Clear any existing
+    
+    _statusPollingInterval = setInterval(async () => {
+        try {
+            // Get remaining time from C++ backend
+            const remaining = await tauriClient.getRemainingSeconds();
+            const cycle = await tauriClient.getCurrentRepeatCycle();
+            const complete = await tauriClient.isDurationComplete();
+            
+            // Update timer display with backend values
+            _updateTimerText(remaining);
+            
+            // Update repeat badge
+            if (_elements.repeatBadge &amp;&amp; cycle > 0) {
+                _elements.repeatBadge.style.display = 'inline';
+                _elements.repeatBadge.textContent = `Cycle ${cycle}`;
+            }
+            
+            // Check if backend says duration is complete
+            if (complete &amp;&amp; !_isPublishing) {
+                _stopStatusPolling();
+                _hideTimerDisplay();
+            }
+        } catch (err) {
+            // Ignore polling errors
+        }
+    }, 500); // Poll every 500ms
+}
+
+/**
+ * Stop status polling
+ */
+function _stopStatusPolling() {
+    if (_statusPollingInterval) {
+        clearInterval(_statusPollingInterval);
+        _statusPollingInterval = null;
+    }
+}
+
+/**
+ * Show timer display
+ */
+function _showTimerDisplay() {
+    if (_elements.timerDisplay) {
+        _elements.timerDisplay.style.display = 'flex';
+    }
+}
+
+/**
+ * Update timer display text
+ */
+function _updateTimerText(seconds) {
+    if (_elements.timerText) {
+        if (seconds >= 60) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            _elements.timerText.textContent = `${mins}m ${secs}s remaining`;
+        } else {
+            _elements.timerText.textContent = `${seconds}s remaining`;
+        }
+    }
+}
+
+/**
+ * Hide the timer display
+ */
+function _hideTimerDisplay() {
+    if (_elements.timerDisplay) {
+        _elements.timerDisplay.style.display = 'none';
+    }
+    if (_elements.repeatBadge) {
+        _elements.repeatBadge.style.display = 'none';
+    }
+}
+
+// ============================================================================
+// PUBLIC API
+// ============================================================================
+
+/**
+ * Check if currently publishing
+ * @memberof module:PublishPanel
+ * @returns {boolean}
+ */
+export function isPublishing() {
+    return _isPublishing;
+}
+
+/**
+ * Reset statistics
+ * @memberof module:PublishPanel
+ */
+export function resetStats() {
+    store.resetStats();
+    showToast('Statistics reset');
+}
+
+// Export module
+export const PublishPanel = {
+    init,
+    getTemplate,
+    startPublishing,
+    stopPublishing,
+    isPublishing,
+    resetStats
+};
+
+export default PublishPanel;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-FrameViewer.html">FrameViewer</a></li><li><a href="module-app.html">app</a></li><li><a href="module-bindings.html">bindings</a></li><li><a href="module-components.html">components</a></li><li><a href="module-configManager.html">configManager</a></li><li><a href="module-copyFilter.html">copyFilter</a></li><li><a href="module-dragManager.html">dragManager</a></li><li><a href="module-embeddedMathEditor.html">embeddedMathEditor</a></li><li><a href="module-equationTemplates.html">equationTemplates</a></li><li><a href="module-expressionConverter.html">expressionConverter</a></li><li><a href="module-formatters.html">formatters</a></li><li><a href="module-keyboardShortcuts.html">keyboardShortcuts</a></li><li><a href="module-mathEvaluator.html">mathEvaluator</a></li><li><a href="module-mathLiveEditor.html">mathLiveEditor</a></li><li><a href="module-standards.html">standards</a></li><li><a href="module-store.html">store</a></li><li><a href="module-tauriClient.html">tauriClient</a></li><li><a href="module-toast.html">toast</a></li><li><a href="module-validators.html">validators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_copyFilter">_copyFilter</a></li><li><a href="global.html#_getDurationSettings">_getDurationSettings</a></li><li><a href="global.html#_hideTimerDisplay">_hideTimerDisplay</a></li><li><a href="global.html#_setupDragEvents">_setupDragEvents</a></li><li><a href="global.html#_showTimerDisplay">_showTimerDisplay</a></li><li><a href="global.html#_startStatusPolling">_startStatusPolling</a></li><li><a href="global.html#_stopStatusPolling">_stopStatusPolling</a></li><li><a href="global.html#_updateTimerText">_updateTimerText</a></li><li><a href="global.html#autoDetectMAC">autoDetectMAC</a></li><li><a href="global.html#bindEvents">bindEvents</a></li><li><a href="global.html#cacheElements">cacheElements</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#formatDuration">formatDuration</a></li><li><a href="global.html#formatNumber">formatNumber</a></li><li><a href="global.html#formatRate">formatRate</a></li><li><a href="global.html#getChannelsListHTML">getChannelsListHTML</a></li><li><a href="global.html#getDefaultColor">getDefaultColor</a></li><li><a href="global.html#handleQuickAdd">handleQuickAdd</a></li><li><a href="global.html#handleResetClick">handleResetClick</a></li><li><a href="global.html#handleStoreChange">handleStoreChange</a></li><li><a href="global.html#loadNetworkInterfaces">loadNetworkInterfaces</a></li><li><a href="global.html#rebuildSamplesPerCycleDropdown">rebuildSamplesPerCycleDropdown</a></li><li><a href="global.html#resetStatsDisplay">resetStatsDisplay</a></li><li><a href="global.html#setupStoreSubscriptions">setupStoreSubscriptions</a></li><li><a href="global.html#syncFromStore">syncFromStore</a></li><li><a href="global.html#syncToServer">syncToServer</a></li><li><a href="global.html#updateSampleRate">updateSampleRate</a></li><li><a href="global.html#updateStandard">updateStandard</a></li><li><a href="global.html#updateStatsDisplay">updateStatsDisplay</a></li><li><a href="global.html#validateMAC">validateMAC</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 05 2026 21:30:19 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

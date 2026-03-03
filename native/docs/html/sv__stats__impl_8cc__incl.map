@@ -1,0 +1,19 @@
+<map id="sv_stats_impl.cc" name="sv_stats_impl.cc">
+<area shape="rect" id="Node000001" title="Transmission Statistics Tracker." alt="" coords="227,5,347,32"/>
+<area shape="rect" id="Node000002" href="$sv__stats_8h.html" title="Transmission Statistics Module." alt="" coords="13,80,152,107"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="250,35,134,77,132,72,253,30"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="176,80,232,107"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="274,31,232,72,228,68,270,34"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="257,80,317,107"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="288,30,289,65,284,63,285,35"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="341,80,398,107"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="302,30,347,70,341,70,301,35"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="422,80,482,107"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="316,30,412,73,406,74,315,35"/>
+<area shape="rect" id="Node000003" href="$sv__native_8h.html" title="Header for Tauri FFI &#45; C interface for Rust." alt="" coords="39,155,127,181"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="84,105,85,140,80,138,82,110"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,229,70,256"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="77,180,56,218,51,214,73,183"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="94,229,162,256"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="92,180,115,216,110,216,89,184"/>
+</map>

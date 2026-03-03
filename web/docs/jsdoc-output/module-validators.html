@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Module: validators</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Module: validators</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>This module provides validation functions for all user inputs in the SV Publisher application.
+All validators follow a consistent pattern: they take an input value and return a boolean
+indicating validity.</p>
+<p><strong>Validation Flow:</strong></p>
+<ol>
+<li>User enters input in form field</li>
+<li>Input passed to validator function</li>
+<li>Validator returns true/false</li>
+<li>If valid: process input, update store</li>
+<li>If invalid: show error toast, highlight field</li>
+</ol>
+<p><strong>Security:</strong></p>
+<ul>
+<li>All inputs are validated before being used</li>
+<li>Regex patterns designed to prevent injection</li>
+<li>Numeric ranges strictly enforced</li>
+<li>No dynamic code execution (no eval)</li>
+</ul>
+<p><strong>Validation Reference:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Function</th>
+<th>Format/Range</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MAC Address</td>
+<td>validateMacAddress</td>
+<td>XX:XX:XX:XX:XX:XX</td>
+</tr>
+<tr>
+<td>App ID</td>
+<td>validateAppId</td>
+<td>0x0000 - 0x3FFF (0-16383)</td>
+</tr>
+<tr>
+<td>SV ID</td>
+<td>validateSvId</td>
+<td>1-65 characters</td>
+</tr>
+<tr>
+<td>PCAP File</td>
+<td>validatePcapFile</td>
+<td>.pcap, .pcapng</td>
+</tr>
+</tbody>
+</table></div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-version">Version:</dt>
+    <dd class="tag-version"><ul class="dummy"><li>1.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>SV-PUB Team</li>
+        </ul>
+    </dd>
+    
+
+    
+    <dt class="tag-copyright">Copyright:</dt>
+    <dd class="tag-copyright"><ul class="dummy"><li>2025 SV Publisher</li></ul></dd>
+    
+
+    
+    <dt class="tag-license">License:</dt>
+    <dd class="tag-license"><ul class="dummy"><li>Proprietary</li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js_utils_validators.js.html">js/utils/validators.js</a>, <a href="js_utils_validators.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Examples</h5>
+    
+        <p class="code-caption">Basic Usage</p>
+    
+    <pre class="prettyprint"><code>import { validateMacAddress, validateAppId } from './utils/validators.js';if (validateMacAddress('01:0C:CD:04:00:00')) {    console.log('Valid MAC');}</code></pre>
+
+        <p class="code-caption">Form Validation</p>
+    
+    <pre class="prettyprint"><code>function validateForm() {    const errors = [];    if (!validateMacAddress(srcMacInput.value)) {        errors.push('Invalid source MAC address');    }    return errors.length === 0;}</code></pre>
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".validateAppId"><span class="type-signature">(static) </span>validateAppId<span class="signature">(appId)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Validates that an Application ID (AppID) is within the valid range
+for IEC 61850 Sampled Values.</p>
+<h2>AppID Range</h2>
+<table>
+<thead>
+<tr>
+<th>Protocol</th>
+<th>Range</th>
+<th>Hex Range</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SV</td>
+<td>0-16383</td>
+<td>0x0000-0x3FFF</td>
+</tr>
+<tr>
+<td>GOOSE</td>
+<td>0-16383</td>
+<td>0x0000-0x3FFF</td>
+</tr>
+</tbody>
+</table>
+<p>The AppID is a 16-bit unsigned integer, but IEC 61850 reserves
+the upper 2 bits, limiting the usable range to 0-16383.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>appId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Application ID (hex string or number)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js_utils_validators.js.html">js/utils/validators.js</a>, <a href="js_utils_validators.js.html#line99">line 99</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="https://iec61850.ucaiug.org/">IEC 61850 UCA</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>True if the AppID is valid, false otherwise</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>validateAppId('4000')   // true - typical SV AppIDvalidateAppId('0')      // true - minimumvalidateAppId('3FFF')   // true - maximumvalidateAppId('4000')   // true - 0x4000 = 16384 - INVALID!validateAppId('FFFF')   // false - too largevalidateAppId(-1)       // false - negativevalidateAppId('ZZZZ')   // false - not hex</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".validateMacAddress"><span class="type-signature">(static) </span>validateMacAddress<span class="signature">(mac)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Validates that a string is a properly formatted MAC address in the format
+<code>XX:XX:XX:XX:XX:XX</code> where X is a hexadecimal digit (0-9, A-F, a-f).</p>
+<p><strong>Valid Format:</strong> <code>XX:XX:XX:XX:XX:XX</code> (colon-separated hex octets)</p>
+<p><strong>IEC 61850 MAC Address Ranges:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Usage</th>
+<th>MAC Pattern</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SV Multicast</td>
+<td>01:0C:CD:04:xx:xx</td>
+<td>01:0C:CD:04:00:00</td>
+</tr>
+<tr>
+<td>GOOSE Multicast</td>
+<td>01:0C:CD:01:xx:xx</td>
+<td>01:0C:CD:01:00:01</td>
+</tr>
+<tr>
+<td>Unicast</td>
+<td>xx:xx:xx:xx:xx:xx</td>
+<td>00:00:00:00:00:01</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>mac</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>MAC address string to validate</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js_utils_validators.js.html">js/utils/validators.js</a>, <a href="js_utils_validators.js.html#line60">line 60</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>True if the MAC address is valid, false otherwise</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>validateMacAddress('01:0C:CD:04:00:00')  // true - SV multicastvalidateMacAddress('00:00:00:00:00:01')  // true - UnicastvalidateMacAddress('01:0c:cd:04:00:00')  // true - lowercase okvalidateMacAddress('01-0C-CD-04-00-00')  // false - wrong separatorvalidateMacAddress('01:0C:CD:04:00')     // false - too shortvalidateMacAddress('GG:00:00:00:00:00')  // false - invalid hex</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".validatePcapFile"><span class="type-signature">(static) </span>validatePcapFile<span class="signature">(fileName)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Validates that a file name has a valid PCAP extension for packet capture files.</p>
+<p><strong>Supported Extensions:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Extension</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.pcap</td>
+<td>Standard PCAP format (libpcap)</td>
+</tr>
+<tr>
+<td>.pcapng</td>
+<td>PCAP Next Generation format</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Validation:</strong> Case-insensitive extension check</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>fileName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>File name to validate</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js_utils_validators.js.html">js/utils/validators.js</a>, <a href="js_utils_validators.js.html#line179">line 179</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="https://wiki.wireshark.org/Development/LibpcapFileFormat">PCAP Format</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>True if the file has a valid PCAP extension</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>validatePcapFile('capture.pcap')     // truevalidatePcapFile('capture.pcapng')   // truevalidatePcapFile('capture.PCAP')     // true - case insensitivevalidatePcapFile('capture.txt')      // falsevalidatePcapFile('capture')          // false - no extension</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".validateSvId"><span class="type-signature">(static) </span>validateSvId<span class="signature">(svId)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Validates that an SV ID (Sampled Values Identifier) meets the IEC 61850
+requirements for length.</p>
+<p><strong>SV ID Requirements:</strong></p>
+<ul>
+<li>Minimum length: 1 character</li>
+<li>Maximum length: 65 characters</li>
+<li>Recommended format: Descriptive identifier (e.g., &quot;MU01&quot;, &quot;Bay1_CT&quot;)</li>
+</ul>
+<p><strong>Validation Logic:</strong></p>
+<ul>
+<li>Empty string → Invalid</li>
+<li>1-65 characters → Valid</li>
+<li>
+<blockquote>
+<p>65 characters → Invalid (too long)</p>
+</blockquote>
+</li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>svId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>SV identifier string to validate</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js_utils_validators.js.html">js/utils/validators.js</a>, <a href="js_utils_validators.js.html#line141">line 141</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="https://webstore.iec.ch/publication/6020">IEC 61850-9-2</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>True if the SV ID is valid, false otherwise</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>validateSvId('MU01')                    // truevalidateSvId('Bay1_Current_Transformer') // truevalidateSvId('')                         // false - emptyvalidateSvId('A'.repeat(66))            // false - too long</code></pre>
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-FrameViewer.html">FrameViewer</a></li><li><a href="module-app.html">app</a></li><li><a href="module-bindings.html">bindings</a></li><li><a href="module-components.html">components</a></li><li><a href="module-configManager.html">configManager</a></li><li><a href="module-copyFilter.html">copyFilter</a></li><li><a href="module-dragManager.html">dragManager</a></li><li><a href="module-embeddedMathEditor.html">embeddedMathEditor</a></li><li><a href="module-equationTemplates.html">equationTemplates</a></li><li><a href="module-expressionConverter.html">expressionConverter</a></li><li><a href="module-formatters.html">formatters</a></li><li><a href="module-keyboardShortcuts.html">keyboardShortcuts</a></li><li><a href="module-mathEvaluator.html">mathEvaluator</a></li><li><a href="module-mathLiveEditor.html">mathLiveEditor</a></li><li><a href="module-standards.html">standards</a></li><li><a href="module-store.html">store</a></li><li><a href="module-tauriClient.html">tauriClient</a></li><li><a href="module-toast.html">toast</a></li><li><a href="module-validators.html">validators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_copyFilter">_copyFilter</a></li><li><a href="global.html#_getDurationSettings">_getDurationSettings</a></li><li><a href="global.html#_hideTimerDisplay">_hideTimerDisplay</a></li><li><a href="global.html#_setupDragEvents">_setupDragEvents</a></li><li><a href="global.html#_showTimerDisplay">_showTimerDisplay</a></li><li><a href="global.html#_startStatusPolling">_startStatusPolling</a></li><li><a href="global.html#_stopStatusPolling">_stopStatusPolling</a></li><li><a href="global.html#_updateTimerText">_updateTimerText</a></li><li><a href="global.html#autoDetectMAC">autoDetectMAC</a></li><li><a href="global.html#bindEvents">bindEvents</a></li><li><a href="global.html#cacheElements">cacheElements</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#formatDuration">formatDuration</a></li><li><a href="global.html#formatNumber">formatNumber</a></li><li><a href="global.html#formatRate">formatRate</a></li><li><a href="global.html#getChannelsListHTML">getChannelsListHTML</a></li><li><a href="global.html#getDefaultColor">getDefaultColor</a></li><li><a href="global.html#handleQuickAdd">handleQuickAdd</a></li><li><a href="global.html#handleResetClick">handleResetClick</a></li><li><a href="global.html#handleStoreChange">handleStoreChange</a></li><li><a href="global.html#loadNetworkInterfaces">loadNetworkInterfaces</a></li><li><a href="global.html#rebuildSamplesPerCycleDropdown">rebuildSamplesPerCycleDropdown</a></li><li><a href="global.html#resetStatsDisplay">resetStatsDisplay</a></li><li><a href="global.html#setupStoreSubscriptions">setupStoreSubscriptions</a></li><li><a href="global.html#syncFromStore">syncFromStore</a></li><li><a href="global.html#syncToServer">syncToServer</a></li><li><a href="global.html#updateSampleRate">updateSampleRate</a></li><li><a href="global.html#updateStandard">updateStandard</a></li><li><a href="global.html#updateStatsDisplay">updateStatsDisplay</a></li><li><a href="global.html#validateMAC">validateMAC</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 05 2026 21:30:19 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

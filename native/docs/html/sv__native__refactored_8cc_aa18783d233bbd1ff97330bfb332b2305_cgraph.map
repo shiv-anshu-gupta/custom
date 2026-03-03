@@ -1,0 +1,7 @@
+<map id="check_duration_elapsed" name="check_duration_elapsed">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,167,32"/>
+<area shape="rect" id="Node000002" href="$sv__native__refactored_8cc.html#a73998198f95089da56c389e492a471e5" title=" " alt="" coords="215,5,311,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="167,16,202,19,196,19,167,21"/>
+<area shape="rect" id="Node000003" href="$sv__stats__impl_8cc.html#ae7cd346e20d4749f60fa7332dfae0dd7" title="Get current time in milliseconds." alt="" coords="359,5,533,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="312,16,346,19,341,19,312,21"/>
+</map>

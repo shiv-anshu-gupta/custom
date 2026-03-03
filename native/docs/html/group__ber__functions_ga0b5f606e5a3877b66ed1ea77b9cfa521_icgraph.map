@@ -1,0 +1,14 @@
+<map id="ber_encode_tlv" name="ber_encode_tlv">
+<area shape="rect" id="Node000001" title="Encode a complete TLV (Tag&#45;Length&#45;Value) structure." alt="" coords="398,107,507,133"/>
+<area shape="rect" id="Node000002" href="$group__ber__functions.html#ga16600f449b4b203bf6a75ee63ddc7c9b" title="Encode a boolean value." alt="" coords="198,5,338,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="422,96,389,71,349,46,323,35,322,30,351,42,392,67,428,97"/>
+<area shape="rect" id="Node000003" href="$group__ber__functions.html#gabce394c789388ac6b60503e8cbf89f2d" title="Encode an octet (byte) string." alt="" coords="187,56,350,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="384,103,320,86,320,81,390,102"/>
+<area shape="rect" id="Node000004" href="$group__ber__functions.html#ga7cdf29a8107215d38dc986e0f952020b" title="Encode a signed integer." alt="" coords="5,132,139,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="382,127,139,144,139,138,383,122"/>
+<area shape="rect" id="Node000005" href="$group__ber__functions.html#gaf975471663de004b1adfb9e209ddc137" title="Encode an unsigned integer." alt="" coords="195,157,342,184"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="384,139,320,159,319,154,390,137"/>
+<area shape="rect" id="Node000006" href="$group__ber__functions.html#gaf86013ff89e2ec24ff3f2eaa38fe2da0" title="Encode a visible (ASCII) string." alt="" coords="202,208,334,251"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="426,143,391,172,351,198,328,210,327,205,349,194,388,168,421,145"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="177,160,139,157,138,151,182,158"/>
+</map>

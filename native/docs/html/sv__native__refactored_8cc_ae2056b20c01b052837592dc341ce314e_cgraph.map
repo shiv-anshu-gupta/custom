@@ -1,0 +1,30 @@
+<map id="publisher_loop_single" name="publisher_loop_single">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,249,151,276"/>
+<area shape="rect" id="Node000002" href="$sv__native__refactored_8cc.html#aa18783d233bbd1ff97330bfb332b2305" title=" " alt="" coords="210,5,371,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,248,93,208,116,152,150,93,172,66,197,42,206,37,203,42,200,46,176,69,154,96,120,154,98,209,85,250"/>
+<area shape="rect" id="Node000005" href="$sv__native__refactored_8cc.html#a081cf319776daba5ec14c60bec132d64" title=" " alt="" coords="234,56,347,83"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="83,248,98,216,123,174,156,130,197,92,221,82,217,86,200,97,160,134,127,177,103,218,88,250"/>
+<area shape="rect" id="Node000006" href="$npcap__transmitter__impl_8cc.html#adc39100394280e20f1f1a569849bdf2d" title="Send a single packet." alt="" coords="222,107,359,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="87,247,131,196,162,168,197,143,212,138,208,141,200,148,166,172,135,200,92,250"/>
+<area shape="rect" id="Node000007" href="$sv__stats__impl_8cc.html#a280e159261a15485b1e0309f59df84e8" title="Record a failed packet transmission." alt="" coords="223,157,358,200"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="112,247,222,204,219,208,115,251"/>
+<area shape="rect" id="Node000008" href="$sv__stats__impl_8cc.html#a210b53baa9526fbb867d2a6b3ad925c4" title="Record a successful packet transmission." alt="" coords="448,221,584,264"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="151,257,434,244,432,249,152,262"/>
+<area shape="rect" id="Node000009" href="$sv__stats__impl_8cc.html#a4e5f02e3cc9b2b06496cca1b54582e0a" title="Reset all statistics to zero." alt="" coords="226,275,354,301"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="150,269,213,277,209,280,152,274"/>
+<area shape="rect" id="Node000010" href="$sv__stats__impl_8cc.html#a4437629953bc0b691829d9c7b77cc061" title="End the current statistics session." alt="" coords="430,292,602,319"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="104,274,148,295,199,311,254,319,310,321,417,318,412,320,310,327,253,324,198,316,146,299,104,279"/>
+<area shape="rect" id="Node000011" href="$sv__stats__impl_8cc.html#ad0737fafaaf6836a17171d40d5a3f77d" title="Start a new statistics session." alt="" coords="444,351,588,393"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="98,274,144,302,200,327,258,343,318,354,431,368,426,370,317,360,257,348,198,332,142,306,99,279"/>
+<area shape="rect" id="Node000012" href="$sv__encoder__impl_8cc.html#a58f4a492f4c37293fdfcc0401b72abd1" title="Encode a single SV packet." alt="" coords="199,427,382,453"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="88,274,131,337,163,374,200,406,223,420,218,420,197,410,159,378,127,341,86,279"/>
+<area shape="rect" id="Node000013" href="$sv__encoder__impl_8cc.html#a3b78a24c9d83ba55bcd667b3b7fec64c" title="Set encoder configuration." alt="" coords="213,477,368,504"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="84,274,99,313,123,364,156,418,177,442,200,463,208,470,202,469,197,467,173,446,152,421,118,367,94,315,83,279"/>
+<area shape="rect" id="Node000003" href="$sv__native__refactored_8cc.html#a73998198f95089da56c389e492a471e5" title=" " alt="" coords="468,88,564,115"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="345,30,383,41,474,80,469,82,381,47,347,35"/>
+<area shape="rect" id="Node000004" href="$sv__stats__impl_8cc.html#ae7cd346e20d4749f60fa7332dfae0dd7" title="Get current time in milliseconds." alt="" coords="650,263,825,289"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="536,113,710,253,705,253,534,118"/>
+<area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="584,250,638,260,632,261,585,256"/>
+<area shape="poly" id="edge11_Node000010_Node000004" title=" " alt="" coords="602,291,637,289,632,290,603,297"/>
+<area shape="poly" id="edge13_Node000011_Node000004" title=" " alt="" coords="566,348,688,297,693,295,568,353"/>
+</map>

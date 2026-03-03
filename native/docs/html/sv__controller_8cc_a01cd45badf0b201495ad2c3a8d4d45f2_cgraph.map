@@ -1,0 +1,9 @@
+<map id="sv_mp_remove_all_publishers" name="sv_mp_remove_all_publishers">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,202,57"/>
+<area shape="rect" id="Node000002" href="$class_sv_controller.html#afc102679fe80499c39d27cb8640394cc" title=" " alt="" coords="285,5,435,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="202,32,272,27,267,28,203,37"/>
+<area shape="rect" id="Node000004" href="$class_sv_controller.html#a5cb6536920f73a6b6cdf8f2c58023620" title=" " alt="" coords="250,56,470,83"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="202,51,237,57,231,57,202,56"/>
+<area shape="rect" id="Node000003" href="$class_sv_controller.html#aa5d7c635a8015c90217076cf4722542c" title=" " alt="" coords="518,5,691,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="435,16,505,18,500,19,435,21"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="npcap_get_remaining_seconds" name="npcap_get_remaining_seconds">
+<area shape="rect" id="Node000001" title="Get remaining time in seconds." alt="" coords="5,5,150,48"/>
+<area shape="rect" id="Node000002" href="$sv__native__refactored_8cc.html#a73998198f95089da56c389e492a471e5" title=" " alt="" coords="198,13,294,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,24,185,26,179,27,150,29"/>
+<area shape="rect" id="Node000003" href="$sv__stats__impl_8cc.html#ae7cd346e20d4749f60fa7332dfae0dd7" title="Get current time in milliseconds." alt="" coords="342,13,516,40"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="295,24,329,27,324,27,295,29"/>
+</map>

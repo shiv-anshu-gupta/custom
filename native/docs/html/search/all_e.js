@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['factors_20iec_2061850_209_202le_0',['📐 Scaling Factors (IEC 61850-9-2LE)',['../dir_68267d1309a1af8e8297ef4c3efbcdba.html#autotoc_md13',1,'']]],
+  ['failed_1',['FAILED',['../class_sv_publisher_instance.html#ad12d80994d1fe598636b7be053ee410faf9d81633bb769b3477f43e90a4ba5164',1,'SvPublisherInstance']]],
+  ['ffi_20bindings_20—_20ffi_20rs_20680_20lines_2',['3.1.3 FFI Bindings — &lt;span class=&quot;tt&quot;&gt;ffi.rs&lt;/span&gt; (680 lines)',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#autotoc_md28',1,'']]],
+  ['ffi_20rs_20680_20lines_3',['3.1.3 FFI Bindings — &lt;span class=&quot;tt&quot;&gt;ffi.rs&lt;/span&gt; (680 lines)',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#autotoc_md28',1,'']]],
+  ['file_20inventory_4',['3.2.2 Source File Inventory',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#autotoc_md31',1,'']]],
+  ['file_20structure_20modular_20architecture_5',['📁 File Structure (Modular Architecture)',['../dir_68267d1309a1af8e8297ef4c3efbcdba.html#autotoc_md3',1,'']]],
+  ['files_6',['Source Files',['../md__r_e_a_d_m_e.html#autotoc_md78',1,'']]],
+  ['find_5fci_7',['find_ci',['../equation__processor_8cc.html#a431d9c2aa50d604907558f307a28f5ad',1,'equation_processor.cc']]],
+  ['findpublisher_8',['findPublisher',['../class_sv_controller.html#a72d12914c561f72b1d483dde8de441dd',1,'SvController']]],
+  ['flags_9',['flags',['../structpcap__if.html#a462c59a3be93b52a0762043bbab5fd3c',1,'pcap_if']]],
+  ['flow_10',['Flow',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#autotoc_md45',1,'5.1 Single-Publisher Flow'],['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#autotoc_md46',1,'5.2 Multi-Publisher Flow']]],
+  ['flow_20detail_11',['5. Data Flow Detail',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#data-flow',1,'']]],
+  ['flow_20iec_2061850_209_202le_12',['5.3 Packet Encoding Flow (IEC 61850-9-2LE)',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#autotoc_md47',1,'']]],
+  ['format_13',['9.1 Equation Format',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#autotoc_md56',1,'']]],
+  ['frame_20cache_14',['7. Pre-Built Frame Cache',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#frame-cache',1,'']]],
+  ['framelen_15',['frameLen',['../struct_schedule_entry.html#a1382c9e66f1e13629c3d01a4f8751e9e',1,'ScheduleEntry']]],
+  ['frameptr_16',['framePtr',['../struct_schedule_entry.html#aa3f691931517eb008d59d1452c8c4b52',1,'ScheduleEntry']]],
+  ['free_5fframe_5fcache_17',['free_frame_cache',['../sv__native__refactored_8cc.html#a24b2107199112b58a421c0c873ea7d12',1,'sv_native_refactored.cc']]],
+  ['freeframecache_18',['freeFrameCache',['../class_sv_publisher_instance.html#a0dac671a8464aeed05e6e83485c5c0ab',1,'SvPublisherInstance']]],
+  ['frequency_19',['frequency',['../struct_eq_channel_data.html#a6332da14a24744f965008d31a2b9481b',1,'EqChannelData::frequency'],['../struct_config.html#ae1a585e8280c1692c874bf46f8d32f26',1,'Config::frequency'],['../struct_publisher_config.html#ac63846529bd28ce0425d158795ebbcac',1,'PublisherConfig::frequency']]],
+  ['frontend_20ipc_20',['16.3 Tauri Command API (Frontend IPC)',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#autotoc_md73',1,'']]],
+  ['functions_21',['BER Encoding Functions',['../group__ber__functions.html',1,'']]]
+];

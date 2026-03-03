@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: js/components/equationEditor.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: js/components/equationEditor.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module equationEditor
+ * @file equationEditor.js
+ * @description MathLive Equation Editor with Beautiful Math Rendering
+ * 
+ * Type "V0 = 325*sin(2*PI*50*t)" and press Enter to create a channel.
+ * Features pretty math rendering using MathLive.
+ * 
+ * @author SV-PUB Team
+ * @date 2025
+ */
+
+import { showToast } from '../plugins/toast.js';
+import { store, ADDITIONAL_CHANNELS } from '../store/index.js';
+
+// ============================================================================
+// STATE
+// ============================================================================
+
+let mathLiveLoaded = false;
+let mathLiveReady = false;
+
+// ============================================================================
+// MATHLIVE LOADER
+// ============================================================================
+
+async function loadMathLive() {
+    if (mathLiveLoaded &amp;&amp; mathLiveReady) return true;
+
+    return new Promise((resolve) => {
+        // Check if already loaded
+        if (customElements.get('math-field')) {
+            mathLiveLoaded = true;
+            mathLiveReady = true;
+            console.log('[MathLive] Already loaded');
+            resolve(true);
+            return;
+        }
+
+        // Load CSS
+        if (!document.querySelector('link[href*="mathlive"]')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://unpkg.com/mathlive@0.101.0/dist/mathlive-static.css';
+            document.head.appendChild(link);
+        }
+
+        // Load JS
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/mathlive@0.101.0/dist/mathlive.min.js';
+        script.onload = () => {
+            mathLiveLoaded = true;
+            // Wait for custom element to be defined
+            customElements.whenDefined('math-field').then(() => {
+                mathLiveReady = true;
+                console.log('[MathLive] Ready');
+                resolve(true);
+            }).catch(() => resolve(false));
+        };
+        script.onerror = () => {
+            console.error('[MathLive] Failed to load');
+            resolve(false);
+        };
+        document.head.appendChild(script);
+    });
+}
+
+// ============================================================================
+// RENDER
+// ============================================================================
+
+function render() {
+    const config = store.config.standardConfig;
+    const channels = store.getChannels();
+    const allowCustom = store.allowsCustomChannels();
+    const existingIds = channels.map(c => c.id);
+    
+    // Filter out already added channels from the quick add palette
+    const availableToAdd = ADDITIONAL_CHANNELS.filter(c => !existingIds.includes(c.id));
+
+    return `
+        &lt;div class="eq-editor">
+            &lt;!-- Header -->
+            &lt;div class="eq-header">
+                &lt;div class="eq-standard">
+                    &lt;span class="eq-std-icon">⚡&lt;/span>
+                    &lt;span class="eq-std-name">${config.name}&lt;/span>
+                    &lt;span class="eq-std-badge">${channels.length} / ${config.maxChannels}&lt;/span>
+                &lt;/div>
+                ${!allowCustom ? '&lt;span class="eq-locked">🔒 Fixed channels (switch to IEC 61869 for custom)&lt;/span>' : ''}
+            &lt;/div>
+
+            &lt;!-- Quick Add Palette -->
+            ${allowCustom &amp;&amp; availableToAdd.length > 0 ? `
+            &lt;div class="eq-quick-add">
+                &lt;label>⚡ Quick Add (click to add):&lt;/label>
+                &lt;div class="eq-quick-buttons">
+                    ${availableToAdd.map(ch => `
+                        &lt;button class="eq-quick-btn" data-quickadd="${ch.id}" title="${ch.description}&amp;#10;${ch.equation}">
+                            ${ch.label}
+                        &lt;/button>
+                    `).join('')}
+                &lt;/div>
+            &lt;/div>
+            ` : ''}
+
+            &lt;!-- Main Input - MathLive for pretty math -->
+            &lt;div class="eq-main-input">
+                &lt;label>Or type custom equation and press Enter:&lt;/label>
+                &lt;math-field id="eqMainField" 
+                    placeholder="V0 = 325 \\cdot \\sin(2\\pi \\cdot 50 \\cdot t)"
+                    virtual-keyboard-mode="manual"
+                    smart-fence="true"
+                    smart-superscript="true"
+                >&lt;/math-field>
+                &lt;div class="eq-hint">
+                    Format: &lt;code>ChannelName = equation&lt;/code> | 
+                    Press &lt;kbd>Enter&lt;/kbd> to add/update
+                &lt;/div>
+            &lt;/div>
+
+            &lt;!-- Channel List -->
+            &lt;div class="eq-channels">
+                &lt;h4>📡 Active Channels (${channels.length})&lt;/h4>
+                &lt;div class="eq-channel-list">
+                    ${channels.map(ch => renderChannel(ch, allowCustom)).join('')}
+                &lt;/div>
+            &lt;/div>
+        &lt;/div>
+    `;
+}
+
+function renderChannel(channel, allowCustom) {
+    const canDelete = !channel.isBase &amp;&amp; allowCustom;
+    const typeClass = channel.type;
+    const latexEq = mathJsToLatex(channel.equation);
+    
+    return `
+        &lt;div class="eq-channel ${typeClass}" data-id="${channel.id}">
+            &lt;div class="eq-ch-label" style="border-left-color: ${channel.color}">
+                &lt;span class="eq-ch-name">${channel.id}&lt;/span>
+                &lt;span class="eq-ch-type">${channel.type}&lt;/span>
+            &lt;/div>
+            &lt;math-field class="eq-ch-field" 
+                data-channel="${channel.id}"
+                virtual-keyboard-mode="manual"
+                smart-fence="true"
+            >${latexEq}&lt;/math-field>
+            ${canDelete ? `&lt;button class="eq-ch-delete" data-delete="${channel.id}" title="Delete">🗑️&lt;/button>` : ''}
+        &lt;/div>
+    `;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/"/g, '&amp;quot;').replace(/&lt;/g, '&amp;lt;').replace(/>/g, '&amp;gt;');
+}
+
+// ============================================================================
+// CONVERSION HELPERS
+// ============================================================================
+
+function mathJsToLatex(expr) {
+    if (!expr) return '';
+    return expr
+        .replace(/\*/g, ' \\cdot ')
+        .replace(/PI/gi, '\\pi')
+        .replace(/sin\(/gi, '\\sin(')
+        .replace(/cos\(/gi, '\\cos(')
+        .replace(/tan\(/gi, '\\tan(')
+        .replace(/sqrt\(/gi, '\\sqrt{')
+        .replace(/\^(\d+)/g, '^{$1}')
+        .replace(/\^(\([^)]+\))/g, '^{$1}');
+}
+
+function latexToMathJs(latex) {
+    if (!latex) return '';
+    return latex
+        .replace(/\\cdot\s*/g, '*')
+        .replace(/\\times\s*/g, '*')
+        .replace(/\\pi/g, 'PI')
+        .replace(/\\sin\s*/g, 'sin')
+        .replace(/\\cos\s*/g, 'cos')
+        .replace(/\\tan\s*/g, 'tan')
+        .replace(/\\sqrt\{([^}]+)\}/g, 'sqrt($1)')
+        .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
+        .replace(/\^{([^}]+)}/g, '^($1)')
+        .replace(/\{/g, '(')
+        .replace(/\}/g, ')')
+        .replace(/\\left/g, '')
+        .replace(/\\right/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function parseEquation(latex) {
+    // Convert LaTeX to math.js format first
+    const text = latexToMathJs(latex);
+    
+    // Parse: ChannelName = Equation
+    const match = text.trim().match(/^([A-Za-z][A-Za-z0-9_]*)\s*=\s*(.+)$/);
+    if (!match) return null;
+    
+    return {
+        channelId: match[1],
+        equation: match[2].trim()
+    };
+}
+
+// ============================================================================
+// EVENT HANDLERS
+// ============================================================================
+
+function bindEvents() {
+    const container = document.getElementById('embeddedEditorContainer');
+    if (!container) return;
+
+    // Quick Add buttons
+    container.querySelectorAll('.eq-quick-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const channelId = btn.dataset.quickadd;
+            const channelDef = ADDITIONAL_CHANNELS.find(c => c.id === channelId);
+            if (channelDef) {
+                handleQuickAdd(channelDef);
+            }
+        });
+    });
+
+    // Main MathLive input - use 'change' event (fires on Enter/blur)
+    const mainField = container.querySelector('#eqMainField');
+    if (mainField) {
+        // MathLive 'change' event fires when user presses Enter or leaves field
+        mainField.addEventListener('change', (e) => {
+            const latex = mainField.getValue ? mainField.getValue() : mainField.value;
+            if (latex &amp;&amp; latex.trim()) {
+                handleAddChannel(latex);
+                // Clear the field
+                if (mainField.setValue) {
+                    mainField.setValue('');
+                } else {
+                    mainField.value = '';
+                }
+            }
+        });
+    }
+
+    // Channel MathLive fields - update equation on change
+    container.querySelectorAll('.eq-ch-field').forEach(field => {
+        field.addEventListener('change', () => {
+            const channelId = field.dataset.channel;
+            const latex = field.getValue ? field.getValue() : field.value;
+            const equation = latexToMathJs(latex);
+            store.updateEquation(channelId, equation);
+            updateHiddenInput(channelId, equation);
+            showToast(`${channelId} updated`, 'success');
+        });
+    });
+
+    // Delete buttons
+    container.querySelectorAll('.eq-ch-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.delete;
+            if (confirm(`Delete channel ${id}?`)) {
+                store.removeChannel(id);
+                removeHiddenInput(id);
+                refresh();
+                showToast(`${id} deleted`, 'info');
+            }
+        });
+    });
+}
+
+/**
+ * Handle quick add button click
+ */
+function handleQuickAdd(channelDef) {
+    const channel = store.parseAndAddChannel(`${channelDef.id} = ${channelDef.equation}`);
+    if (channel) {
+        createHiddenInput(channel.id, channelDef.equation);
+        showToast(`✓ ${channelDef.id} added: ${channelDef.description}`, 'success');
+        refresh();
+    }
+}
+
+function handleAddChannel(latex) {
+    const parsed = parseEquation(latex);
+    
+    if (!parsed) {
+        showToast('Format: ChannelName = equation (e.g., V0 = Va + Vb + Vc)', 'error');
+        return;
+    }
+
+    const { channelId, equation } = parsed;
+
+    // Check if it's an existing channel (update it)
+    const existing = store.getChannel(channelId);
+    if (existing) {
+        store.updateEquation(channelId, equation);
+        updateHiddenInput(channelId, equation);
+        showToast(`${channelId} updated!`, 'success');
+        refresh();
+        return;
+    }
+
+    // Add new channel
+    const channel = store.parseAndAddChannel(`${channelId} = ${equation}`);
+    if (channel) {
+        createHiddenInput(channel.id, equation);
+        showToast(`✓ Channel ${channelId} created!`, 'success');
+        refresh();
+    }
+}
+
+// ============================================================================
+// HIDDEN INPUTS (for form submission)
+// ============================================================================
+
+function createHiddenInput(id, equation) {
+    if (document.getElementById(`eq${id}`)) return;
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.id = `eq${id}`;
+    input.name = `eq${id}`;
+    input.value = equation;
+    document.getElementById('embeddedEditorContainer')?.appendChild(input);
+}
+
+function updateHiddenInput(id, equation) {
+    let input = document.getElementById(`eq${id}`);
+    if (!input) {
+        createHiddenInput(id, equation);
+    } else {
+        input.value = equation;
+    }
+}
+
+function removeHiddenInput(id) {
+    document.getElementById(`eq${id}`)?.remove();
+}
+
+function initHiddenInputs() {
+    store.getChannels().forEach(ch => {
+        createHiddenInput(ch.id, ch.equation);
+    });
+}
+
+// ============================================================================
+// REFRESH
+// ============================================================================
+
+function refresh() {
+    const container = document.getElementById('embeddedEditorContainer');
+    if (container) {
+        container.innerHTML = render();
+        bindEvents();
+    }
+}
+
+// ============================================================================
+// INIT
+// ============================================================================
+
+/**
+ * Initialize the equation editor component
+ * @memberof module:equationEditor
+ * @async
+ */
+export async function initEquationEditor() {
+    const container = document.getElementById('embeddedEditorContainer');
+    if (!container) return;
+
+    // Show loading
+    container.innerHTML = '&lt;div class="eq-loading">&lt;div class="spinner">&lt;/div>Loading MathLive...&lt;/div>';
+
+    // Load MathLive
+    const loaded = await loadMathLive();
+    
+    if (!loaded) {
+        container.innerHTML = '&lt;div class="eq-error">⚠️ Failed to load MathLive. Please refresh.&lt;/div>';
+        return;
+    }
+
+    // Wait a bit for custom elements to fully initialize
+    await new Promise(r => setTimeout(r, 200));
+
+    // Render
+    container.innerHTML = render();
+    
+    // Wait for math-field elements to upgrade
+    await new Promise(r => setTimeout(r, 100));
+    
+    bindEvents();
+    initHiddenInputs();
+
+    // Subscribe to standard changes
+    store.onChange(() => {
+        console.log('[EquationEditor] Standard changed, refreshing...');
+        refresh();
+    });
+
+    console.log('[EquationEditor] Initialized with MathLive');
+}
+
+// ============================================================================
+// EXPORTS
+// ============================================================================
+
+/**
+ * Get all channel equations
+ * @memberof module:equationEditor
+ * @returns {Object} Channel IDs as keys and equations as values
+ */
+export function getAllEquations() {
+    const equations = {};
+    store.getChannels().forEach(c => {
+        const input = document.getElementById(`eq${c.id}`);
+        equations[c.id] = input?.value || c.equation;
+    });
+    return equations;
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-FrameViewer.html">FrameViewer</a></li><li><a href="module-app.html">app</a></li><li><a href="module-bindings.html">bindings</a></li><li><a href="module-components.html">components</a></li><li><a href="module-configManager.html">configManager</a></li><li><a href="module-copyFilter.html">copyFilter</a></li><li><a href="module-dragManager.html">dragManager</a></li><li><a href="module-embeddedMathEditor.html">embeddedMathEditor</a></li><li><a href="module-equationTemplates.html">equationTemplates</a></li><li><a href="module-expressionConverter.html">expressionConverter</a></li><li><a href="module-formatters.html">formatters</a></li><li><a href="module-keyboardShortcuts.html">keyboardShortcuts</a></li><li><a href="module-mathEvaluator.html">mathEvaluator</a></li><li><a href="module-mathLiveEditor.html">mathLiveEditor</a></li><li><a href="module-standards.html">standards</a></li><li><a href="module-store.html">store</a></li><li><a href="module-tauriClient.html">tauriClient</a></li><li><a href="module-toast.html">toast</a></li><li><a href="module-validators.html">validators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_copyFilter">_copyFilter</a></li><li><a href="global.html#_getDurationSettings">_getDurationSettings</a></li><li><a href="global.html#_hideTimerDisplay">_hideTimerDisplay</a></li><li><a href="global.html#_setupDragEvents">_setupDragEvents</a></li><li><a href="global.html#_showTimerDisplay">_showTimerDisplay</a></li><li><a href="global.html#_startStatusPolling">_startStatusPolling</a></li><li><a href="global.html#_stopStatusPolling">_stopStatusPolling</a></li><li><a href="global.html#_updateTimerText">_updateTimerText</a></li><li><a href="global.html#autoDetectMAC">autoDetectMAC</a></li><li><a href="global.html#bindEvents">bindEvents</a></li><li><a href="global.html#cacheElements">cacheElements</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#formatDuration">formatDuration</a></li><li><a href="global.html#formatNumber">formatNumber</a></li><li><a href="global.html#formatRate">formatRate</a></li><li><a href="global.html#getChannelsListHTML">getChannelsListHTML</a></li><li><a href="global.html#getDefaultColor">getDefaultColor</a></li><li><a href="global.html#handleQuickAdd">handleQuickAdd</a></li><li><a href="global.html#handleResetClick">handleResetClick</a></li><li><a href="global.html#handleStoreChange">handleStoreChange</a></li><li><a href="global.html#loadNetworkInterfaces">loadNetworkInterfaces</a></li><li><a href="global.html#rebuildSamplesPerCycleDropdown">rebuildSamplesPerCycleDropdown</a></li><li><a href="global.html#resetStatsDisplay">resetStatsDisplay</a></li><li><a href="global.html#setupStoreSubscriptions">setupStoreSubscriptions</a></li><li><a href="global.html#syncFromStore">syncFromStore</a></li><li><a href="global.html#syncToServer">syncToServer</a></li><li><a href="global.html#updateSampleRate">updateSampleRate</a></li><li><a href="global.html#updateStandard">updateStandard</a></li><li><a href="global.html#updateStatsDisplay">updateStatsDisplay</a></li><li><a href="global.html#validateMAC">validateMAC</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 05 2026 21:30:19 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

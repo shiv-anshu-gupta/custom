@@ -1,0 +1,11 @@
+<map id="ber_encode_unsigned" name="ber_encode_unsigned">
+<area shape="rect" id="Node000001" title="Encode an unsigned integer." alt="" coords="5,56,153,83"/>
+<area shape="rect" id="Node000002" href="$group__ber__functions.html#ga0b5f606e5a3877b66ed1ea77b9cfa521" title="Encode a complete TLV (Tag&#45;Length&#45;Value) structure." alt="" coords="201,56,310,83"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,67,188,69,182,70,153,72"/>
+<area shape="rect" id="Node000003" href="$group__ber__functions.html#gae8c87366b9131a84e9349a936f2a4603" title="Encode a BER length field." alt="" coords="364,5,494,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="303,53,363,38,368,36,304,58"/>
+<area shape="rect" id="Node000004" href="$group__ber__functions.html#ga598f5cfdc4720cc0b4300b291e509048" title="Encode a single&#45;byte ASN.1 tag." alt="" coords="372,56,485,83"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="310,67,359,69,354,70,311,72"/>
+<area shape="rect" id="Node000005" href="$group__ber__functions.html#ga8601aff017ed95b7f021ca988d85382a" title="Calculate bytes needed to encode a BER length field." alt="" coords="358,107,499,133"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="304,81,369,102,363,102,303,86"/>
+</map>

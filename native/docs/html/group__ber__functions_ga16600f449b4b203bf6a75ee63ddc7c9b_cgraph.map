@@ -1,0 +1,11 @@
+<map id="ber_encode_boolean" name="ber_encode_boolean">
+<area shape="rect" id="Node000001" title="Encode a boolean value." alt="" coords="5,56,146,83"/>
+<area shape="rect" id="Node000002" href="$group__ber__functions.html#ga0b5f606e5a3877b66ed1ea77b9cfa521" title="Encode a complete TLV (Tag&#45;Length&#45;Value) structure." alt="" coords="194,56,303,83"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,67,181,69,176,70,146,72"/>
+<area shape="rect" id="Node000003" href="$group__ber__functions.html#gae8c87366b9131a84e9349a936f2a4603" title="Encode a BER length field." alt="" coords="356,5,487,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="296,53,356,38,361,36,297,58"/>
+<area shape="rect" id="Node000004" href="$group__ber__functions.html#ga598f5cfdc4720cc0b4300b291e509048" title="Encode a single&#45;byte ASN.1 tag." alt="" coords="365,56,478,83"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="303,67,352,69,347,70,304,72"/>
+<area shape="rect" id="Node000005" href="$group__ber__functions.html#ga8601aff017ed95b7f021ca988d85382a" title="Calculate bytes needed to encode a BER length field." alt="" coords="351,107,492,133"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="297,81,362,102,356,102,296,86"/>
+</map>

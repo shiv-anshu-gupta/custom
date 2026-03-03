@@ -1,0 +1,5 @@
+<map id="npcap_stats_get_duration_ms" name="npcap_stats_get_duration_ms">
+<area shape="rect" id="Node000001" title="Get session duration in milliseconds." alt="" coords="5,5,201,32"/>
+<area shape="rect" id="Node000002" href="$sv__stats__impl_8cc.html#ae7cd346e20d4749f60fa7332dfae0dd7" title="Get current time in milliseconds." alt="" coords="249,5,423,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,16,236,19,230,19,201,21"/>
+</map>

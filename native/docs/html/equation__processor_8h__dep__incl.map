@@ -1,0 +1,15 @@
+<map id="equation_processor.h" name="equation_processor.h">
+<area shape="rect" id="Node000001" title="Equation Processing for SV Publisher." alt="" coords="189,5,334,32"/>
+<area shape="rect" id="Node000002" href="$equation__processor_8cc.html" title="Equation Processing Implementation." alt="" coords="5,80,158,107"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="215,40,114,82,112,77,218,36"/>
+<area shape="rect" id="Node000003" href="$sv__native__refactored_8cc.html" title="SV Publisher &#45; Main Entry Point for Tauri FFI." alt="" coords="181,80,342,107"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="263,46,264,81,259,79,260,50"/>
+<area shape="rect" id="Node000004" href="$sv__publisher__instance_8h.html" title="Single SV Publisher Instance (one Merging Unit)." alt="" coords="366,80,528,107"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="308,35,417,79,412,80,308,41"/>
+<area shape="rect" id="Node000005" href="$sv__controller_8h.html" title="Main Controller + SharedBuffer for Multi&#45;Publisher SV System." alt="" coords="312,155,419,181"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="424,116,381,157,378,152,419,118"/>
+<area shape="rect" id="Node000007" href="$sv__publisher__instance_8cc.html" title="Implementation of SvPublisherInstance." alt="" coords="443,155,611,181"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="473,115,516,155,510,154,471,120"/>
+<area shape="rect" id="Node000006" href="$sv__controller_8cc.html" title="Implementation of SharedBuffer + SvController + Multi&#45;Publisher FFI." alt="" coords="309,229,422,256"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="367,195,368,231,363,227,364,199"/>
+</map>

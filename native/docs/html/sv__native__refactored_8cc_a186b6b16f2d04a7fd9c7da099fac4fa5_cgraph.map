@@ -1,0 +1,48 @@
+<map id="publisher_loop_batch" name="publisher_loop_batch">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,335,149,361"/>
+<area shape="poly" id="edge23_Node000001_Node000001" title=" " alt="" coords="43,335,37,326,41,316,55,310,77,308,101,311,115,318,110,321,99,316,77,313,56,315,45,320,42,325,48,334"/>
+<area shape="rect" id="Node000002" href="$sv__native__refactored_8cc.html#aa18783d233bbd1ff97330bfb332b2305" title=" " alt="" coords="197,5,358,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="77,334,86,281,107,206,122,164,141,123,166,84,195,49,212,37,209,42,199,53,170,87,146,125,127,166,112,207,92,283,83,335"/>
+<area shape="rect" id="Node000003" href="$sv__native__refactored_8cc.html#a73998198f95089da56c389e492a471e5" title=" " alt="" coords="450,56,546,83"/>
+<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="77,334,86,287,106,220,122,184,141,150,166,118,195,92,223,76,253,65,317,52,379,50,436,56,432,59,379,56,317,57,255,70,225,81,198,97,169,122,146,153,126,186,111,222,91,288,83,335"/>
+<area shape="rect" id="Node000005" href="$sv__native__refactored_8cc.html#a866cf9a417d9328fcde6e029c4ca97b0" title=" " alt="" coords="201,107,354,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="80,334,93,296,117,245,151,190,171,165,195,143,204,139,201,143,198,147,175,169,155,194,122,247,98,298,85,335"/>
+<area shape="rect" id="Node000006" href="$npcap__transmitter__impl_8cc.html#a3469e50a088ee2f93c0678e6d0286f56" title="Add a packet to the queue." alt="" coords="214,157,340,184"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="83,333,124,267,157,228,195,194,206,189,203,193,198,198,160,231,129,270,88,336"/>
+<area shape="rect" id="Node000007" href="$npcap__transmitter__impl_8cc.html#a745d7b22094024f754840a72a108339e" title="Allocate a send queue." alt="" coords="207,208,348,235"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="89,333,133,289,163,265,195,244,210,239,207,243,198,249,166,270,137,293,93,336"/>
+<area shape="rect" id="Node000008" href="$npcap__transmitter__impl_8cc.html#ae10474fb21e8e779e37605a98dd327eb" title="Destroy a send queue." alt="" coords="203,259,352,285"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="107,332,196,295,217,289,213,293,198,300,110,336"/>
+<area shape="rect" id="Node000009" href="$npcap__transmitter__impl_8cc.html#ae6e10a3445bc66c81ead5b438b868ea8" title="Transmit all packets in the queue." alt="" coords="201,309,354,336"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="148,337,188,332,184,336,151,341"/>
+<area shape="rect" id="Node000010" href="$sv__stats__impl_8cc.html#a210b53baa9526fbb867d2a6b3ad925c4" title="Record a successful packet transmission." alt="" coords="430,340,565,383"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="149,348,416,357,413,361,150,353"/>
+<area shape="rect" id="Node000011" href="$sv__stats__impl_8cc.html#a4e5f02e3cc9b2b06496cca1b54582e0a" title="Reset all statistics to zero." alt="" coords="213,411,342,437"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="114,359,228,403,223,406,115,365"/>
+<area shape="rect" id="Node000012" href="$sv__stats__impl_8cc.html#a4437629953bc0b691829d9c7b77cc061" title="End the current statistics session." alt="" coords="412,407,584,433"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="89,359,134,406,164,429,198,447,241,458,276,459,358,447,431,436,426,438,358,452,276,464,240,464,196,452,161,434,130,410,89,365"/>
+<area shape="rect" id="Node000013" href="$sv__stats__impl_8cc.html#ad0737fafaaf6836a17171d40d5a3f77d" title="Start a new statistics session." alt="" coords="426,457,570,500"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="87,359,130,414,162,443,198,466,250,482,306,491,360,492,413,491,407,493,360,498,305,496,249,488,196,470,158,448,127,418,87,364"/>
+<area shape="rect" id="Node000014" href="$sv__native__refactored_8cc.html#a7e6a8d1afed7cf1fc23dc37a7e5d872a" title=" " alt="" coords="221,563,334,589"/>
+<area shape="poly" id="edge17_Node000001_Node000014" title=" " alt="" coords="83,359,100,397,124,445,157,497,198,542,216,555,211,556,195,546,152,500,119,448,95,399,83,365"/>
+<area shape="rect" id="Node000020" href="$sv__native__refactored_8cc.html#a9e741bc398d62c9cc67a447fcf2f2d52" title=" " alt="" coords="202,613,352,640"/>
+<area shape="poly" id="edge24_Node000001_Node000020" title=" " alt="" coords="81,359,94,407,115,471,149,540,172,572,198,599,204,605,199,605,195,603,168,575,145,543,110,473,89,408,81,365"/>
+<area shape="rect" id="Node000021" href="$sv__native__refactored_8cc.html#a172e4a5cb3e8a1f59552a7990cfd53be" title=" " alt="" coords="234,664,321,691"/>
+<area shape="poly" id="edge25_Node000001_Node000021" title=" " alt="" coords="80,359,90,415,109,493,124,535,144,577,168,616,198,650,222,666,217,666,195,654,164,619,139,579,119,537,104,494,85,416,79,364"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="338,30,437,54,432,56,340,35"/>
+<area shape="rect" id="Node000004" href="$sv__stats__impl_8cc.html#ae7cd346e20d4749f60fa7332dfae0dd7" title="Get current time in milliseconds." alt="" coords="637,377,812,404"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="510,81,708,364,702,365,507,86"/>
+<area shape="poly" id="edge11_Node000010_Node000004" title=" " alt="" coords="565,367,624,377,619,378,566,373"/>
+<area shape="poly" id="edge14_Node000012_Node000004" title=" " alt="" coords="584,406,624,403,619,405,585,411"/>
+<area shape="poly" id="edge16_Node000013_Node000004" title=" " alt="" coords="558,454,588,443,679,409,674,411,590,448,560,459"/>
+<area shape="rect" id="Node000015" href="$sv__native__refactored_8cc.html#a2f554ded106c1391e42b140e22584fb3" title=" " alt="" coords="432,524,563,551"/>
+<area shape="poly" id="edge18_Node000014_Node000015" title=" " alt="" coords="333,564,420,551,415,552,335,569"/>
+<area shape="rect" id="Node000017" href="$sv__native__refactored_8cc.html#a081cf319776daba5ec14c60bec132d64" title=" " alt="" coords="441,575,554,601"/>
+<area shape="poly" id="edge20_Node000014_Node000017" title=" " alt="" coords="334,576,428,584,423,585,334,582"/>
+<area shape="rect" id="Node000018" href="$sv__encoder__impl_8cc.html#a58f4a492f4c37293fdfcc0401b72abd1" title="Encode a single SV packet." alt="" coords="406,625,589,652"/>
+<area shape="poly" id="edge21_Node000014_Node000018" title=" " alt="" coords="326,587,407,611,434,621,429,621,405,616,326,593"/>
+<area shape="rect" id="Node000019" href="$sv__encoder__impl_8cc.html#a3b78a24c9d83ba55bcd667b3b7fec64c" title="Set encoder configuration." alt="" coords="420,676,575,703"/>
+<area shape="poly" id="edge22_Node000014_Node000019" title=" " alt="" coords="335,586,360,599,376,615,384,632,392,647,408,662,417,670,412,668,404,666,388,650,380,634,371,618,356,603,334,592"/>
+<area shape="rect" id="Node000016" href="$sv__native__refactored_8cc.html#a24b2107199112b58a421c0c873ea7d12" title=" " alt="" coords="662,524,787,551"/>
+<area shape="poly" id="edge19_Node000015_Node000016" title=" " alt="" coords="563,535,649,537,644,538,564,540"/>
+</map>

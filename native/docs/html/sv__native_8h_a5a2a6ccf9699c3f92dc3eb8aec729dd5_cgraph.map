@@ -1,0 +1,5 @@
+<map id="npcap_open" name="npcap_open">
+<area shape="rect" id="Node000001" title="Open a network interface for transmission." alt="" coords="5,5,97,32"/>
+<area shape="rect" id="Node000002" href="$npcap__transmitter__impl_8cc.html#a39ee732e324dd79ccb1fa45449572b35" title="Load Npcap DLL (Windows only)." alt="" coords="145,5,252,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,16,132,18,127,19,97,21"/>
+</map>

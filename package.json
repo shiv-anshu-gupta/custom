@@ -1,0 +1,22 @@
+{
+  "name": "tauri-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "tauri": "tauri",
+    "docs": "jsdoc -c web/jsdoc.config.json",
+    "docs:serve": "npx serve web/docs/jsdoc-output",
+    "docs:watch": "nodemon --watch web/js --watch web/shared --ext js --exec \"npm run docs\""
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "docdash": "^2.0.0",
+    "jsdoc": "^4.0.0",
+    "nodemon": "^3.0.0"
+  },
+  "dependencies": {
+    "jsDoc": "npm:jsdoc@^4.0.5"
+  }
+}

@@ -1,0 +1,13 @@
+<map id="trim" name="trim">
+<area shape="rect" id="Node000001" title=" " alt="" coords="564,56,608,83"/>
+<area shape="rect" id="Node000002" href="$equation__processor_8cc.html#a6c84bd97ee3baa8a7d6433b3441ef6a1" title=" " alt="" coords="25,5,154,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="547,58,516,53,418,40,319,30,155,22,155,17,319,25,418,34,517,48,552,58"/>
+<area shape="rect" id="Node000003" href="$equation__processor_8cc.html#a8103716ec53a0b4e13650d1587fabace" title=" " alt="" coords="222,56,352,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="546,70,353,72,353,67,552,69"/>
+<area shape="rect" id="Node000005" href="$equation__processor_8cc.html#ab11083e2183c7caba557d0f7a0ad56dc" title=" " alt="" coords="400,107,516,133"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="552,83,495,109,493,103,547,84"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="215,53,144,35,144,30,219,50"/>
+<area shape="rect" id="Node000004" href="$equation__processor_8cc.html#a0c185ca473430af355b8e7e73cf3f22a" title=" " alt="" coords="5,56,174,83"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="203,70,174,72,174,67,209,69"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="393,102,334,86,335,81,399,102"/>
+</map>

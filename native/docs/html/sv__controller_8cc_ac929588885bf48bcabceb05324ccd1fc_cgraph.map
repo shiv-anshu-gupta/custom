@@ -1,0 +1,9 @@
+<map id="sv_mp_get_usb_pad_size" name="sv_mp_get_usb_pad_size">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,178,57"/>
+<area shape="rect" id="Node000002" href="$class_sv_controller.html#ab3ad5b82894656aeda26f6b177a27062" title=" " alt="" coords="226,5,418,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,32,213,30,207,32,179,37"/>
+<area shape="rect" id="Node000003" href="$class_sv_controller.html#afc102679fe80499c39d27cb8640394cc" title=" " alt="" coords="247,56,397,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="178,51,234,59,228,60,178,56"/>
+<area shape="rect" id="Node000004" href="$class_sv_controller.html#aa5d7c635a8015c90217076cf4722542c" title=" " alt="" coords="466,56,639,83"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="397,67,453,69,448,69,397,72"/>
+</map>

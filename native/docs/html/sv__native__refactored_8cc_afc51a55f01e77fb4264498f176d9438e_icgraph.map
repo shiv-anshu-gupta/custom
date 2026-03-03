@@ -1,0 +1,7 @@
+<map id="npcap_publisher_stop" name="npcap_publisher_stop">
+<area shape="rect" id="Node000001" title="Stop publishing." alt="" coords="363,5,510,32"/>
+<area shape="rect" id="Node000002" href="$class_sv_controller.html#ac173f4f124e0394b58014d7e3e41f78d" title=" " alt="" coords="170,5,315,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="345,19,316,21,316,16,350,19"/>
+<area shape="rect" id="Node000003" href="$sv__controller_8cc.html#a5a4e1896309f676cd254911b12b1ab77" title=" " alt="" coords="5,5,122,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="151,19,122,21,122,16,157,18"/>
+</map>

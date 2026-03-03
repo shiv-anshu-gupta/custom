@@ -1,0 +1,11 @@
+<map id="sv_mp_get_remaining_seconds" name="sv_mp_get_remaining_seconds">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,154,77"/>
+<area shape="rect" id="Node000002" href="$class_sv_controller.html#af0e1968bd02dc648bed03d77021d90fc" title=" " alt="" coords="202,5,383,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,43,189,41,184,42,154,48"/>
+<area shape="rect" id="Node000004" href="$class_sv_controller.html#afc102679fe80499c39d27cb8640394cc" title=" " alt="" coords="217,72,368,99"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="154,64,204,73,199,73,154,69"/>
+<area shape="rect" id="Node000003" href="$sv__stats__impl_8cc.html#ae7cd346e20d4749f60fa7332dfae0dd7" title="Get current time in milliseconds." alt="" coords="431,13,605,40"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="383,24,418,26,413,27,383,29"/>
+<area shape="rect" id="Node000005" href="$class_sv_controller.html#aa5d7c635a8015c90217076cf4722542c" title=" " alt="" coords="432,72,605,99"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="368,83,418,85,413,85,368,88"/>
+</map>

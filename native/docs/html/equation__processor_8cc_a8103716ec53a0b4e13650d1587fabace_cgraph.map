@@ -1,0 +1,16 @@
+<map id="eq_parse_equation" name="eq_parse_equation">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,107,136,133"/>
+<area shape="rect" id="Node000002" href="$equation__processor_8cc.html#ab11083e2183c7caba557d0f7a0ad56dc" title=" " alt="" coords="184,5,300,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,104,182,48,204,38,200,42,185,53,95,108"/>
+<area shape="rect" id="Node000003" href="$equation__processor_8cc.html#ac1326429ee84fb3c0408537b03c067e9" title=" " alt="" coords="357,31,400,57"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="127,104,343,50,341,55,129,109"/>
+<area shape="rect" id="Node000004" href="$equation__processor_8cc.html#a88db7263b4473e36aba6a711bfee46b4" title=" " alt="" coords="184,107,301,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="136,117,171,119,166,121,137,123"/>
+<area shape="rect" id="Node000005" href="$equation__processor_8cc.html#a7c902fb3d0dd9ddec694b0ed1f5ae4ed" title=" " alt="" coords="195,157,290,184"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="119,131,183,151,178,154,118,137"/>
+<area shape="rect" id="Node000006" href="$equation__processor_8cc.html#a1812b6f4961abf271c0dfba1449e5d7f" title=" " alt="" coords="184,208,300,235"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="91,131,134,162,185,194,196,201,191,201,182,198,131,166,90,137"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="301,27,345,37,340,38,301,32"/>
+<area shape="rect" id="Node000007" href="$equation__processor_8cc.html#a431d9c2aa50d604907558f307a28f5ad" title=" " alt="" coords="349,208,408,235"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="301,219,336,221,331,221,301,224"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="npcap_is_open" name="npcap_is_open">
+<area shape="rect" id="Node000001" title="Check if an interface is open." alt="" coords="363,31,471,57"/>
+<area shape="rect" id="Node000002" href="$sv__native__refactored_8cc.html#af14f0670e1b30534e33524f8c49a5580" title="Start publishing." alt="" coords="167,5,315,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="345,34,315,32,315,27,350,34"/>
+<area shape="rect" id="Node000003" href="$class_sv_controller.html#afc0ec922fad685082c626ca36cb764a8" title=" " alt="" coords="170,56,312,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="350,54,312,62,312,56,345,54"/>
+<area shape="rect" id="Node000004" href="$sv__controller_8cc.html#a1b6b0344797b9edf84722fde0e1c660a" title=" " alt="" coords="5,56,119,83"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="152,70,119,72,119,67,157,69"/>
+</map>

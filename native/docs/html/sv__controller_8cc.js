@@ -1,0 +1,25 @@
+var sv__controller_8cc =
+[
+    [ "npcap_publisher_is_running", "sv__controller_8cc.html#a2a043b3a2450447e0dbb5e912b86eeca", null ],
+    [ "sv_mp_add_publisher", "sv__controller_8cc.html#a37ca1523522cda12526f77a86f22dd56", null ],
+    [ "sv_mp_configure_publisher", "sv__controller_8cc.html#ad6449fd2c8114de07386cd501c39b7fe", null ],
+    [ "sv_mp_get_current_repeat_cycle", "sv__controller_8cc.html#a0e6b44d9a104d34fbd3e88a0a6def5b6", null ],
+    [ "sv_mp_get_last_error", "sv__controller_8cc.html#ab2f50b0a91fb6bcaecbad0ba5650c824", null ],
+    [ "sv_mp_get_publisher_count", "sv__controller_8cc.html#a89715d3cc5ecea346991f8a14b808b8b", null ],
+    [ "sv_mp_get_remaining_seconds", "sv__controller_8cc.html#a18632d17429f282727988ddac33d95cc", null ],
+    [ "sv_mp_get_send_mode", "sv__controller_8cc.html#a718dc981ae1f24b5cdde08637e34ce6b", null ],
+    [ "sv_mp_get_usb_min_gap_us", "sv__controller_8cc.html#a6f3f93c37fab4aa14fb0dad9ea254435", null ],
+    [ "sv_mp_get_usb_pad_size", "sv__controller_8cc.html#ac929588885bf48bcabceb05324ccd1fc", null ],
+    [ "sv_mp_is_duration_complete", "sv__controller_8cc.html#a644da1157cf2e83b99a634f3dc566db1", null ],
+    [ "sv_mp_is_running", "sv__controller_8cc.html#acbaa0a307291cbd4eebd6c6d94ff2963", null ],
+    [ "sv_mp_remove_all_publishers", "sv__controller_8cc.html#a01cd45badf0b201495ad2c3a8d4d45f2", null ],
+    [ "sv_mp_remove_publisher", "sv__controller_8cc.html#ab3fde2e0bbe3ab795aea81d68d57b93a", null ],
+    [ "sv_mp_reset_all", "sv__controller_8cc.html#a5a4e1896309f676cd254911b12b1ab77", null ],
+    [ "sv_mp_set_duration", "sv__controller_8cc.html#a29bbed5b9e350d16b5db94f7e0762b84", null ],
+    [ "sv_mp_set_publisher_equations", "sv__controller_8cc.html#a4d38ae474762b7236baa5ed32bf113e5", null ],
+    [ "sv_mp_set_send_mode", "sv__controller_8cc.html#a4e19eb64427914d1d201436993af1e4c", null ],
+    [ "sv_mp_set_usb_min_gap_us", "sv__controller_8cc.html#a83f8396fc31b1e00a30a7f20be93aca0", null ],
+    [ "sv_mp_set_usb_pad_size", "sv__controller_8cc.html#aa77b032dcd6f5060771fadabd305ca53", null ],
+    [ "sv_mp_start_all", "sv__controller_8cc.html#a1b6b0344797b9edf84722fde0e1c660a", null ],
+    [ "sv_mp_stop_all", "sv__controller_8cc.html#a8e437b55605082f953598ed00550c10d", null ]
+];

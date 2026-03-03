@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Module: app</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Module: app</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>This is the primary entry point for the SV Publisher frontend application.
+It orchestrates initialization of all UI components, plugins, and backend connections.</p>
+<p><strong>Architecture:</strong></p>
+<ul>
+<li>Centralized state management via Store</li>
+<li>Self-contained UI components</li>
+<li>Plugin system for extensibility</li>
+<li>Tauri backend for native operations</li>
+</ul>
+<p><strong>Three-Column Layout:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Left Column</th>
+<th>Middle Column</th>
+<th>Right Column</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data Source</td>
+<td>Frame Viewer</td>
+<td>Publish Panel</td>
+</tr>
+<tr>
+<td>Channels</td>
+<td></td>
+<td>Statistics</td>
+</tr>
+<tr>
+<td>Standard</td>
+<td></td>
+<td>Wireshark Helper</td>
+</tr>
+<tr>
+<td>Stream Settings</td>
+<td></td>
+<td>Preview</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Initialization Order:</strong></p>
+<ol>
+<li>Drag Manager (document-level events)</li>
+<li>Left Column Components</li>
+<li>Middle Column Components</li>
+<li>Right Column Components</li>
+<li>Math Editor (async)</li>
+<li>Plugins</li>
+<li>Theme System</li>
+<li>Tauri Backend Connection</li>
+</ol>
+<p><strong>Security:</strong></p>
+<ul>
+<li>All inputs validated before processing</li>
+<li>DOM updates use textContent (not innerHTML)</li>
+<li>Backend uses Tauri's secure invoke() API</li>
+<li>No eval() or dynamic script execution</li>
+</ul></div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-version">Version:</dt>
+    <dd class="tag-version"><ul class="dummy"><li>1.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>SV-PUB Team</li>
+        </ul>
+    </dd>
+    
+
+    
+    <dt class="tag-copyright">Copyright:</dt>
+    <dd class="tag-copyright"><ul class="dummy"><li>2025 SV Publisher</li></ul></dd>
+    
+
+    
+    <dt class="tag-license">License:</dt>
+    <dd class="tag-license"><ul class="dummy"><li>Proprietary</li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js_app.js.html">js/app.js</a>, <a href="js_app.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Examples</h5>
+    
+        <p class="code-caption">Debug Access (Browser Console)</p>
+    
+    <pre class="prettyprint"><code>// Access application statewindow.__store.configwindow.__store.data// Access UI moduleswindow.__modules.StandardSelectorwindow.__modules.Statistics</code></pre>
+
+        <p class="code-caption">Manual Component Re-initialization</p>
+    
+    <pre class="prettyprint"><code>// Re-initialize a specific componentwindow.__modules.Statistics.init(document.getElementById('statistics-container'))</code></pre>
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+        <h3 class="subsection-title">Requires</h3>
+
+        <ul>
+            <li><a href="module-store.html">module:store</a></li>
+        
+            <li><a href="module-components.html">module:components</a></li>
+        
+            <li>module:plugins/configManager</li>
+        
+            <li>module:plugins/keyboardShortcuts</li>
+        
+            <li>module:utils/tauriClient</li>
+        
+            <li>module:utils/dragManager</li>
+        </ul>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".initApp"><span class="type-signature">(async, static) </span>initApp<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Main bootstrapping function that initializes the entire application.
+Components are initialized in a specific order to ensure dependencies are met.</p>
+<p><strong>Initialization Order:</strong></p>
+<ol>
+<li>Drag Manager - Document-level mouse events</li>
+<li>Left Column - DataSource, Channels, Standard, StreamSettings</li>
+<li>Middle Column - FrameViewer</li>
+<li>Right Column - PublishPanel, Statistics, WiresharkHelper, Preview</li>
+<li>Math Editor - MathLive equation editor (async)</li>
+<li>Plugins - Config buttons, keyboard shortcuts, unload warning</li>
+<li>Theme System - Light/dark mode toggle</li>
+<li>Backend - Tauri connection</li>
+<li>Debug Exposure - window.__store, window.__modules</li>
+</ol>
+<p><strong>Component Dependencies:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Depends On</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>All Components</td>
+<td>Store</td>
+</tr>
+<tr>
+<td>ChannelsDisplay</td>
+<td>DataSource state</td>
+</tr>
+<tr>
+<td>StreamSettings</td>
+<td>StandardSelector state</td>
+</tr>
+<tr>
+<td>PublishPanel</td>
+<td>TauriClient</td>
+</tr>
+<tr>
+<td>Statistics</td>
+<td>TauriClient</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js_app.js.html">js/app.js</a>, <a href="js_app.js.html#line102">line 102</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><code>initThemeToggle</code> for theme system details</li>
+        
+            <li><a href="module-store.html"><code>module:store</code></a> for state management</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+<h5>Fires:</h5>
+<ul>
+    <li>module:store#event:initialized - When store is ready</li>
+
+    <li>module:tauriClient#event:connect - When backend connection is established</li>
+</ul>
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        <p>If critical components fail to initialize</p>
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Resolves when initialization is complete</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;void></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// Automatic (recommended - handled by DOMContentLoaded)document.addEventListener('DOMContentLoaded', initApp);</code></pre>
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-FrameViewer.html">FrameViewer</a></li><li><a href="module-app.html">app</a></li><li><a href="module-bindings.html">bindings</a></li><li><a href="module-components.html">components</a></li><li><a href="module-configManager.html">configManager</a></li><li><a href="module-copyFilter.html">copyFilter</a></li><li><a href="module-dragManager.html">dragManager</a></li><li><a href="module-embeddedMathEditor.html">embeddedMathEditor</a></li><li><a href="module-equationTemplates.html">equationTemplates</a></li><li><a href="module-expressionConverter.html">expressionConverter</a></li><li><a href="module-formatters.html">formatters</a></li><li><a href="module-keyboardShortcuts.html">keyboardShortcuts</a></li><li><a href="module-mathEvaluator.html">mathEvaluator</a></li><li><a href="module-mathLiveEditor.html">mathLiveEditor</a></li><li><a href="module-standards.html">standards</a></li><li><a href="module-store.html">store</a></li><li><a href="module-tauriClient.html">tauriClient</a></li><li><a href="module-toast.html">toast</a></li><li><a href="module-validators.html">validators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_copyFilter">_copyFilter</a></li><li><a href="global.html#_getDurationSettings">_getDurationSettings</a></li><li><a href="global.html#_hideTimerDisplay">_hideTimerDisplay</a></li><li><a href="global.html#_setupDragEvents">_setupDragEvents</a></li><li><a href="global.html#_showTimerDisplay">_showTimerDisplay</a></li><li><a href="global.html#_startStatusPolling">_startStatusPolling</a></li><li><a href="global.html#_stopStatusPolling">_stopStatusPolling</a></li><li><a href="global.html#_updateTimerText">_updateTimerText</a></li><li><a href="global.html#autoDetectMAC">autoDetectMAC</a></li><li><a href="global.html#bindEvents">bindEvents</a></li><li><a href="global.html#cacheElements">cacheElements</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#formatDuration">formatDuration</a></li><li><a href="global.html#formatNumber">formatNumber</a></li><li><a href="global.html#formatRate">formatRate</a></li><li><a href="global.html#getChannelsListHTML">getChannelsListHTML</a></li><li><a href="global.html#getDefaultColor">getDefaultColor</a></li><li><a href="global.html#handleQuickAdd">handleQuickAdd</a></li><li><a href="global.html#handleResetClick">handleResetClick</a></li><li><a href="global.html#handleStoreChange">handleStoreChange</a></li><li><a href="global.html#loadNetworkInterfaces">loadNetworkInterfaces</a></li><li><a href="global.html#rebuildSamplesPerCycleDropdown">rebuildSamplesPerCycleDropdown</a></li><li><a href="global.html#resetStatsDisplay">resetStatsDisplay</a></li><li><a href="global.html#setupStoreSubscriptions">setupStoreSubscriptions</a></li><li><a href="global.html#syncFromStore">syncFromStore</a></li><li><a href="global.html#syncToServer">syncToServer</a></li><li><a href="global.html#updateSampleRate">updateSampleRate</a></li><li><a href="global.html#updateStandard">updateStandard</a></li><li><a href="global.html#updateStatsDisplay">updateStatsDisplay</a></li><li><a href="global.html#validateMAC">validateMAC</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 05 2026 21:30:19 GMT+0530 (India Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

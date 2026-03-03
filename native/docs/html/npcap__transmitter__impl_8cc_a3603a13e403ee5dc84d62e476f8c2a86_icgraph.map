@@ -1,0 +1,11 @@
+<map id="npcap_sendqueue_available" name="npcap_sendqueue_available">
+<area shape="rect" id="Node000001" title="Check if SendQueue API is available." alt="" coords="566,31,751,57"/>
+<area shape="rect" id="Node000002" href="$sv__native__refactored_8cc.html#af14f0670e1b30534e33524f8c49a5580" title="Start publishing." alt="" coords="364,5,512,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="548,32,512,30,512,25,553,32"/>
+<area shape="rect" id="Node000003" href="$class_sv_controller.html#a30dfd716e1e85042e41a2299fac5711f" title=" " alt="" coords="357,56,518,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="553,56,519,63,519,57,548,57"/>
+<area shape="rect" id="Node000004" href="$class_sv_controller.html#afc0ec922fad685082c626ca36cb764a8" title=" " alt="" coords="167,56,309,83"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="339,69,310,72,310,67,344,69"/>
+<area shape="rect" id="Node000005" href="$sv__controller_8cc.html#a1b6b0344797b9edf84722fde0e1c660a" title=" " alt="" coords="5,56,119,83"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="148,70,119,72,119,67,153,69"/>
+</map>

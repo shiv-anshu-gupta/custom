@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['rate_5fbytes_5fsent_0',['rate_bytes_sent',['../struct_stats_data.html#aa651633776e7bbc709b1c91c23efc2d5',1,'StatsData::rate_bytes_sent'],['../struct_transmit_stats.html#af8dcfcde3b7616208a61ca2b23c2f944',1,'TransmitStats::rate_bytes_sent']]],
+  ['rate_5fpackets_5fsent_1',['rate_packets_sent',['../struct_stats_data.html#a25dfd628f21bf74b91f872086b8805ef',1,'StatsData::rate_packets_sent'],['../struct_transmit_stats.html#a99098a83dcad475f71be7cac413cd708',1,'TransmitStats::rate_packets_sent']]],
+  ['rate_5fwindow_5fstart_5fms_2',['rate_window_start_ms',['../struct_stats_data.html#ac14dd383777ba5012aa0aff6be481585',1,'StatsData::rate_window_start_ms'],['../struct_transmit_stats.html#a4148d9ac7a62e6f1c4c8db009f5f6432',1,'TransmitStats::rate_window_start_ms']]],
+  ['raw_20socket_3',['Linux (Raw Socket)',['../dir_68267d1309a1af8e8297ef4c3efbcdba.html#autotoc_md16',1,'']]],
+  ['readme_2emd_4',['README.md',['../_r_e_a_d_m_e_8md.html',1,'']]],
+  ['ready_5',['READY',['../class_sv_publisher_instance.html#ad12d80994d1fe598636b7be053ee410fa6a1a880c947b73ff347439f9e6570656',1,'SvPublisherInstance']]],
+  ['recommended_6',['Compile Modular Version (Recommended)',['../dir_68267d1309a1af8e8297ef4c3efbcdba.html#autotoc_md6',1,'']]],
+  ['reference_7',['API Reference',['../md__r_e_a_d_m_e.html#autotoc_md85',1,'']]],
+  ['reference_20quick_20index_8',['16. API Reference Quick Index',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#api-index',1,'']]],
+  ['references_9',['📚 References',['../dir_68267d1309a1af8e8297ef4c3efbcdba.html#autotoc_md19',1,'']]],
+  ['removeallpublishers_10',['removeAllPublishers',['../class_sv_controller.html#a5cb6536920f73a6b6cdf8f2c58023620',1,'SvController']]],
+  ['removepublisher_11',['removePublisher',['../class_sv_controller.html#ac69c3d0cc5c360501683ea9a96e5b6db',1,'SvController']]],
+  ['repeat_20system_12',['10. Duration &amp;amp; Repeat System',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#duration-repeat',1,'']]],
+  ['repeatcount_13',['repeatCount',['../struct_config.html#a2cada51f76e6b48fcdd1bbd9aa1f0368',1,'Config::repeatCount'],['../struct_duration_config.html#aa3d4175ae98be66c04833f6838a1d4be',1,'DurationConfig::repeatCount']]],
+  ['repeatenabled_14',['repeatEnabled',['../struct_config.html#a8195c3c552ccd10d3f1adce55757c138',1,'Config::repeatEnabled'],['../struct_duration_config.html#a80122d1199f1d7b1210711552b066cea',1,'DurationConfig::repeatEnabled']]],
+  ['repeatinfinite_15',['repeatInfinite',['../struct_config.html#a14f3c82f00179675f2b61f4326f98129',1,'Config::repeatInfinite'],['../struct_duration_config.html#aac5cd7b27619d7bada781e599171132d',1,'DurationConfig::repeatInfinite']]],
+  ['resetall_16',['resetAll',['../class_sv_controller.html#ac173f4f124e0394b58014d7e3e41f78d',1,'SvController']]],
+  ['restore_5fthread_5fpriority_17',['restore_thread_priority',['../sv__native__refactored_8cc.html#a9e741bc398d62c9cc67a447fcf2f2d52',1,'sv_native_refactored.cc']]],
+  ['restorethreadpriority_18',['restoreThreadPriority',['../class_sv_controller.html#a3c943142f1ce34aac0434603ee3531c0',1,'SvController']]],
+  ['rs_19',['3.1.1 Entry Point — &lt;span class=&quot;tt&quot;&gt;lib.rs&lt;/span&gt;',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#autotoc_md25',1,'']]],
+  ['rs_20—_20c_20compilation_20',['13.2 build.rs — C++ Compilation',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#autotoc_md67',1,'']]],
+  ['rs_20680_20lines_21',['3.1.3 FFI Bindings — &lt;span class=&quot;tt&quot;&gt;ffi.rs&lt;/span&gt; (680 lines)',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#autotoc_md28',1,'']]],
+  ['rs_20713_20lines_22',['3.1.2 Command Handlers — &lt;span class=&quot;tt&quot;&gt;commands.rs&lt;/span&gt; (713 lines)',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#autotoc_md26',1,'']]],
+  ['rust_23',['Rust',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#autotoc_md34',1,'SvConfig (Rust)'],['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#autotoc_md38',1,'TransmitStats (C / Rust)']]],
+  ['rust_20layer_24',['3.1 Rust Layer',['../C:/Users/shiva/OneDrive/Desktop/SV-PUB/rust-version/native/docs/BACKEND_ARCHITECTURE.md#rust-layer',1,'']]]
+];

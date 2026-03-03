@@ -1,0 +1,9 @@
+<map id="sv_mp_get_usb_min_gap_us" name="sv_mp_get_usb_min_gap_us">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,196,57"/>
+<area shape="rect" id="Node000002" href="$class_sv_controller.html#ab2cce65928cfa71b22b0aea91a5fbd26" title=" " alt="" coords="244,5,449,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,32,231,30,225,31,197,37"/>
+<area shape="rect" id="Node000003" href="$class_sv_controller.html#afc102679fe80499c39d27cb8640394cc" title=" " alt="" coords="271,56,422,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="196,51,258,60,253,60,196,56"/>
+<area shape="rect" id="Node000004" href="$class_sv_controller.html#aa5d7c635a8015c90217076cf4722542c" title=" " alt="" coords="497,56,670,83"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="422,67,484,69,479,69,422,72"/>
+</map>
