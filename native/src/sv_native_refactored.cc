@@ -236,8 +236,12 @@ static void prebuild_frames() {
 static inline void spin_pause() {
 #if defined(_MSC_VER)
     _mm_pause();
-#elif defined(__GNUC__) || defined(__clang__)
+#elif defined(__x86_64__) || defined(__i386__)
     __builtin_ia32_pause();
+#elif defined(__aarch64__) || defined(__arm__)
+    asm volatile("yield");
+#else
+    sched_yield();
 #endif
 }
 
@@ -844,7 +848,8 @@ int npcap_publisher_start(void) {
             
         case SEND_MODE_AUTO:
         default:
-            /* Auto-detect: use SendQueue if available, else fall back to single */
+#ifdef _WIN32
+            /* Windows: use Npcap SendQueue if available, else single */
             if (npcap_sendqueue_available()) {
                 printf("[publisher] Mode: AUTO -> SendQueue (batch)\n");
                 g_thread = std::thread(publisher_loop_batch);
@@ -852,6 +857,14 @@ int npcap_publisher_start(void) {
                 printf("[publisher] Mode: AUTO -> single (no sendqueue)\n");
                 g_thread = std::thread(publisher_loop_single);
             }
+#else
+            /* Linux/macOS: prefer immediate mode for precise epoch-based
+             * pacing. SendQueue is emulated and works well for high-speed
+             * TIER 2, but immediate mode gives best overall pacing at all
+             * rates. User can explicitly select batch mode if desired. */
+            printf("[publisher] Mode: AUTO -> SendPacket (immediate, Linux optimized)\n");
+            g_thread = std::thread(publisher_loop_immediate);
+#endif
             break;
     }
     

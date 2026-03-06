@@ -6,6 +6,9 @@
   "scripts": {
     "build": "node scripts/build.js",
     "tauri": "tauri",
+    "setcap": "sudo setcap 'cap_net_raw,cap_net_admin=eip' src-tauri/target/debug/sv-publisher && echo '✅ Capabilities set on debug binary'",
+    "setcap:release": "sudo setcap 'cap_net_raw,cap_net_admin=eip' src-tauri/target/release/sv-publisher && echo '✅ Capabilities set on release binary'",
+    "dev": "npm run tauri build -- --debug && npm run setcap && npm run tauri dev",
     "docs": "jsdoc -c web/jsdoc.config.json",
     "docs:serve": "npx serve web/docs/jsdoc-output",
     "docs:watch": "nodemon --watch web/js --watch web/shared --ext js --exec \"npm run docs\""

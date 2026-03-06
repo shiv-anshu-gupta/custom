@@ -558,7 +558,15 @@ void SvController::writerLoop()
         break;
     case 0: /* Auto */
     default:
+#ifdef _WIN32
         useBatch = npcap_sendqueue_available();
+#else
+        /* Linux: prefer immediate mode for precise epoch-based pacing.
+         * SendQueue emulation works well for TIER 2 (high-speed), but
+         * immediate mode gives best overall results at all rates.
+         * User can explicitly select batch mode (mode=1) if desired. */
+        useBatch = false;
+#endif
         break;
     }
 

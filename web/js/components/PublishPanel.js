@@ -113,7 +113,7 @@ export function getTemplate() {
                         </label>
                     </div>
                     <div class="send-mode-info" id="sendModeInfo">
-                        <small>Auto-detect: uses SendQueue if Npcap supports it</small>
+                        <small>Auto-detect: selects optimal send mode for your platform</small>
                     </div>
                     <!-- USB Frame Padding (shown when USB-Optimized selected) -->
                     <div class="usb-pad-panel" id="usbPadPanel" style="display:none;">
@@ -392,7 +392,7 @@ function _updateSourceDisplay() {
 
 function _updateSendModeInfo(mode) {
     const descriptions = [
-        'Auto-detect: uses SendQueue if Npcap supports it',
+        'Auto-detect: selects optimal send mode for your platform',
         'SendQueue: batch mode — high throughput, best for PCIe NICs',
         'SendPacket: per-packet mode — best for USB Ethernet adapters',
         'USB-Optimized: spin pacing + min gap + frame padding — fixes duplicate timestamps on USB Ethernet'

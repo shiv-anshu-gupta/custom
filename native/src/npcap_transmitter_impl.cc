@@ -107,19 +107,41 @@ static pcap_t* g_handle = nullptr;
 static char g_error[256] = {0};
 
 #else
-/* Linux/macOS */
+/* Linux/macOS — link against libpcap directly (no DLL loading needed) */
 #include <pcap/pcap.h>
 #ifdef __linux__
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <unistd.h>
+#include <time.h>
 #endif
 #ifdef __APPLE__
 #include <net/if_dl.h>
 #include <ifaddrs.h>
+#include <time.h>
 #endif
 static pcap_t* g_handle = nullptr;
 static char g_error[256] = {0};
+
+/*============================================================================
+ * Linux/macOS SendQueue Emulator
+ *
+ * Npcap's pcap_sendqueue_* API is Windows-only. This emulates it on
+ * Linux/macOS by buffering packets in userspace memory and sending them
+ * via pcap_sendpacket() in a tight loop on transmit.
+ *
+ * Buffer layout per entry:
+ *   [uint32_t pkt_len][uint64_t timestamp_us][pkt_len bytes of data]
+ *
+ * sync=0: blast all packets as fast as possible (TIER 2 high-speed)
+ * sync=1: pace packets using inter-packet timestamp deltas (TIER 1 precise)
+ *============================================================================*/
+typedef struct {
+    unsigned int maxlen;   /* total buffer capacity in bytes */
+    unsigned int len;      /* current used bytes */
+    char* buffer;          /* packet data buffer */
+} linux_send_queue_t;
+
 #endif
 
 /*============================================================================
@@ -376,13 +398,43 @@ int npcap_open(const char* device_name) {
         printf("[npcap] Interface opened (pcap_open_live fallback)\n");
     }
 #else
+    if (g_handle) { pcap_close(g_handle); g_handle = nullptr; }
+    
     char errbuf[PCAP_ERRBUF_SIZE];
-    g_handle = pcap_open_live(device_name, 65536, 1, 1, errbuf);
+    
+    /* Use pcap_create workflow for immediate_mode support.
+     * pcap_set_immediate_mode(1) disables driver-level buffering,
+     * critical for USB Ethernet adapters to avoid packet batching.
+     * Available in libpcap >= 1.5 (standard on modern Linux). */
+    g_handle = pcap_create(device_name, errbuf);
     if (!g_handle) {
-        snprintf(g_error, sizeof(g_error), "%s", errbuf);
+        snprintf(g_error, sizeof(g_error), "pcap_create: %s", errbuf);
         return -1;
     }
-    printf("[npcap] Interface opened\n");
+    
+    pcap_set_snaplen(g_handle, 65536);
+    pcap_set_promisc(g_handle, 1);
+    pcap_set_timeout(g_handle, 1);
+    
+    /* Immediate mode: reduce driver-level send/receive buffering.
+     * Critical for USB Ethernet adapters. */
+    pcap_set_immediate_mode(g_handle, 1);
+    printf("[pcap] Immediate mode enabled (reduced buffering)\n");
+    
+    int activate_ret = pcap_activate(g_handle);
+    if (activate_ret < 0) {
+        snprintf(g_error, sizeof(g_error), "pcap_activate failed (code=%d): %s",
+                 activate_ret, pcap_geterr(g_handle));
+        pcap_close(g_handle);
+        g_handle = nullptr;
+        return -1;
+    }
+    if (activate_ret > 0) {
+        printf("[pcap] pcap_activate warning (code=%d): %s\n",
+               activate_ret, pcap_geterr(g_handle));
+    }
+    
+    printf("[pcap] Interface opened (pcap_create + immediate mode)\n");
 #endif
     
     return 0;
@@ -423,7 +475,8 @@ int npcap_sendqueue_available(void) {
 #ifdef _WIN32
     return (g_queue_alloc && g_queue_add && g_queue_transmit && g_queue_destroy) ? 1 : 0;
 #else
-    return 0;
+    /* Linux/macOS: sendqueue is emulated via pcap_sendpacket loop */
+    return 1;
 #endif
 }
 
@@ -431,7 +484,13 @@ void* npcap_queue_create(unsigned int memsize) {
 #ifdef _WIN32
     return g_queue_alloc ? g_queue_alloc(memsize) : nullptr;
 #else
-    return nullptr;
+    linux_send_queue_t* q = (linux_send_queue_t*)malloc(sizeof(linux_send_queue_t));
+    if (!q) return nullptr;
+    q->buffer = (char*)malloc(memsize);
+    if (!q->buffer) { free(q); return nullptr; }
+    q->maxlen = memsize;
+    q->len = 0;
+    return q;
 #endif
 }
 
@@ -447,7 +506,19 @@ int npcap_queue_add(void* queue, const uint8_t* data, size_t len, uint64_t times
     
     return g_queue_add((pcap_send_queue*)queue, &hdr, data);
 #else
-    return -1;
+    if (!queue || !data) return -1;
+    linux_send_queue_t* q = (linux_send_queue_t*)queue;
+    /* Entry layout: [uint32_t pkt_len][uint64_t timestamp_us][pkt_len bytes data] */
+    uint32_t entry_size = (uint32_t)(4 + 8 + len);
+    if (q->len + entry_size > q->maxlen) return -1;
+    
+    char* p = q->buffer + q->len;
+    uint32_t pkt_len = (uint32_t)len;
+    memcpy(p, &pkt_len, 4);        p += 4;
+    memcpy(p, &timestamp_us, 8);   p += 8;
+    memcpy(p, data, len);
+    q->len += entry_size;
+    return 0;
 #endif
 }
 
@@ -456,13 +527,89 @@ unsigned int npcap_queue_transmit(void* queue, int sync) {
     if (!queue || !g_handle || !g_queue_transmit) return 0;
     return g_queue_transmit(g_handle, (pcap_send_queue*)queue, sync);
 #else
-    return 0;
+    /*
+     * Linux SendQueue Emulator — transmit all buffered packets.
+     *
+     * sync=0: Blast all packets via pcap_sendpacket() with no delay.
+     *         Used by TIER 2 (>4800 pps) where the caller handles
+     *         pacing via spin-wait between batches.
+     *
+     * sync=1: Pace packets using timestamp deltas relative to first packet.
+     *         Uses CLOCK_MONOTONIC + hybrid nanosleep/spin for precision.
+     *         Used by TIER 1 (<=4800 pps) for kernel-like pacing.
+     */
+    if (!queue || !g_handle) return 0;
+    linux_send_queue_t* q = (linux_send_queue_t*)queue;
+    
+    char* p = q->buffer;
+    char* end = q->buffer + q->len;
+    unsigned int total_sent = 0;
+    uint64_t first_ts = 0;
+    int first_pkt = 1;
+    struct timespec start_time;
+    
+    if (sync) {
+        clock_gettime(CLOCK_MONOTONIC, &start_time);
+    }
+    
+    while (p < end) {
+        uint32_t pkt_len;
+        uint64_t ts;
+        memcpy(&pkt_len, p, 4);  p += 4;
+        memcpy(&ts, p, 8);       p += 8;
+        
+        if (first_pkt) {
+            first_ts = ts;
+            first_pkt = 0;
+        }
+        
+        /* sync=1: pace using timestamp deltas relative to first packet.
+         * Hybrid: nanosleep for bulk of the wait, spin for last ~50us. */
+        if (sync && ts > first_ts) {
+            uint64_t delay_us = ts - first_ts;
+            struct timespec target;
+            target.tv_sec  = start_time.tv_sec  + (long)(delay_us / 1000000);
+            target.tv_nsec = start_time.tv_nsec + (long)((delay_us % 1000000) * 1000);
+            if (target.tv_nsec >= 1000000000L) {
+                target.tv_sec++;
+                target.tv_nsec -= 1000000000L;
+            }
+            struct timespec now;
+            clock_gettime(CLOCK_MONOTONIC, &now);
+            long remaining_us = (long)((target.tv_sec - now.tv_sec) * 1000000 +
+                                       (target.tv_nsec - now.tv_nsec) / 1000);
+            if (remaining_us > 80) {
+                struct timespec sleep_req;
+                long sleep_us = remaining_us - 50;
+                sleep_req.tv_sec  = sleep_us / 1000000;
+                sleep_req.tv_nsec = (sleep_us % 1000000) * 1000;
+                nanosleep(&sleep_req, NULL);
+            }
+            /* Spin-wait for remaining time (sub-50us precision) */
+            do {
+                clock_gettime(CLOCK_MONOTONIC, &now);
+            } while (now.tv_sec < target.tv_sec ||
+                     (now.tv_sec == target.tv_sec && now.tv_nsec < target.tv_nsec));
+        }
+        
+        if (pcap_sendpacket(g_handle, (const unsigned char*)p, (int)pkt_len) == 0) {
+            total_sent += pkt_len;
+        }
+        p += pkt_len;
+    }
+    return total_sent;
 #endif
 }
 
 void npcap_queue_destroy(void* queue) {
 #ifdef _WIN32
     if (queue && g_queue_destroy) g_queue_destroy((pcap_send_queue*)queue);
+#else
+    if (queue) {
+        linux_send_queue_t* q = (linux_send_queue_t*)queue;
+        if (q->buffer) free(q->buffer);
+        free(q);
+    }
 #endif
 }
 

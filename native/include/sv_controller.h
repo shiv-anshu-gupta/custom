@@ -63,6 +63,8 @@
 #ifdef _MSC_VER
 #include <intrin.h>
 #endif
+#else
+#include <sched.h>
 #endif
 
 /*============================================================================
@@ -202,8 +204,12 @@ private:
     static inline void spinPause() {
 #if defined(_MSC_VER)
         _mm_pause();
-#elif defined(__GNUC__) || defined(__clang__)
+#elif defined(__x86_64__) || defined(__i386__)
         __builtin_ia32_pause();
+#elif defined(__aarch64__) || defined(__arm__)
+        asm volatile("yield");
+#else
+        sched_yield();
 #endif
     }
 
