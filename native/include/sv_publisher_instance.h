@@ -100,7 +100,8 @@ private:
     EquationProcessor  m_eqProcessor;
 
     /* Internal buffer — pre-built frames for one AC cycle */
-    uint8_t** m_frames;
+    uint8_t*  m_frameData;    // flat contiguous buffer: capacity * SV_MAX_FRAME_SIZE
+    uint8_t** m_frames;       // array of pointers into m_frameData
     size_t*   m_frameLens;
     int       m_frameCount;
     int       m_frameCapacity;

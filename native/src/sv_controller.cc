@@ -176,8 +176,6 @@ uint32_t SvController::addPublisher()
     auto pub = std::make_unique<SvPublisherInstance>(id);
     m_publishers.push_back(std::move(pub));
 
-    printf("[controller] Added publisher %u (total: %zu)\n",
-           id, m_publishers.size());
     return id;
 }
 
@@ -193,7 +191,6 @@ int SvController::removePublisher(uint32_t id)
 
     for (auto it = m_publishers.begin(); it != m_publishers.end(); ++it) {
         if ((*it)->getId() == id) {
-            printf("[controller] Removed publisher %u\n", id);
             m_publishers.erase(it);
             return 0;
         }
@@ -219,8 +216,6 @@ int SvController::removeAllPublishers()
     m_nextId = 1;  /* Reset ID counter for clean session */
     m_sharedBuffer.clear();
 
-    printf("[controller] Removed all %zu publisher(s), ID counter reset\n",
-           count);
     return 0;
 }
 
@@ -287,8 +282,6 @@ int SvController::setSendMode(int mode)
         return -1;
     }
     m_sendMode = mode;
-    const char* names[] = {"AUTO", "SendQueue (batch)", "SendPacket (immediate)", "USB-Optimized (spin+gap)"};
-    printf("[controller] Send mode: %s\n", names[mode]);
     return 0;
 }
 
@@ -1058,8 +1051,6 @@ const char* sv_mp_get_last_error(void)
 void sv_mp_set_usb_pad_size(int bytes)
 {
     SvController::instance().setUsbPadSize(bytes);
-    printf("[controller] USB pad size set to %d bytes\n",
-           SvController::instance().getUsbPadSize());
 }
 
 int sv_mp_get_usb_pad_size(void)
@@ -1070,8 +1061,6 @@ int sv_mp_get_usb_pad_size(void)
 void sv_mp_set_usb_min_gap_us(int us)
 {
     SvController::instance().setUsbMinGapUs(us);
-    printf("[controller] USB min gap set to %d us\n",
-           SvController::instance().getUsbMinGapUs());
 }
 
 int sv_mp_get_usb_min_gap_us(void)

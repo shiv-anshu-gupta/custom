@@ -133,14 +133,13 @@ pub struct InitialState {
 
 #[tauri::command]
 pub fn get_interfaces() -> Result<Vec<NetworkInterface>, String> {
-    println!("📡 get_interfaces called");
     match ffi::list_interfaces() {
         Ok(interfaces) => {
-            println!("📡 Found {} interfaces", interfaces.len());
+            eprintln!("[commands] get_interfaces: found {} interfaces", interfaces.len());
             Ok(interfaces)
         }
         Err(e) => {
-            println!("❌ get_interfaces error: {}", e);
+            eprintln!("[commands] get_interfaces error: {}", e);
             Err(e)
         }
     }
@@ -148,7 +147,7 @@ pub fn get_interfaces() -> Result<Vec<NetworkInterface>, String> {
 
 #[tauri::command]
 pub fn open_interface(name: String) -> Result<(), String> {
-    println!("🔌 open_interface: {}", name);
+    eprintln!("[commands] open_interface: {}", name);
     ffi::open_interface(&name)?;
     *CURRENT_INTERFACE.lock().unwrap() = Some(name);
     Ok(())
@@ -156,7 +155,7 @@ pub fn open_interface(name: String) -> Result<(), String> {
 
 #[tauri::command]
 pub fn close_interface() -> Result<(), String> {
-    println!("🔌 close_interface");
+    eprintln!("[commands] close_interface");
     ffi::close_interface();
     *CURRENT_INTERFACE.lock().unwrap() = None;
     Ok(())
@@ -183,12 +182,9 @@ pub struct DurationSettings {
 
 #[tauri::command]
 pub fn set_duration_mode(settings: DurationSettings) -> Result<(), String> {
-    println!("════════════════════════════════════════════════════════════");
-    println!("⏱️  RUST set_duration_mode CALLED (BACKEND CONTROL!)");
-    println!("    duration={}s, repeat={}, infinite={}, count={}",
+    eprintln!("[commands] set_duration_mode: duration={}s, repeat={}, infinite={}, count={}",
         settings.duration_seconds, settings.repeat_enabled, 
         settings.repeat_infinite, settings.repeat_count);
-    println!("════════════════════════════════════════════════════════════");
     
     ffi::set_duration_mode(
         settings.duration_seconds,
@@ -215,7 +211,7 @@ pub fn is_duration_complete() -> bool {
 
 #[tauri::command]
 pub fn start_publishing() -> Result<(), String> {
-    println!("▶️ start_publishing called");
+    eprintln!("[commands] start_publishing");
     
     // Check if interface is actually open (check C++ state)
     if !ffi::is_open() {
@@ -250,16 +246,15 @@ pub fn start_publishing() -> Result<(), String> {
     BYTES_SENT.store(0, Ordering::SeqCst);
     ERRORS.store(0, Ordering::SeqCst);
     
-    println!("✅ Publisher started - sample rate: {} Hz, channels: {}", config.sample_rate, config.channel_count);
+    eprintln!("[commands] publisher started: rate={} Hz, channels={}", config.sample_rate, config.channel_count);
     Ok(())
 }
 
 #[tauri::command]
 pub fn stop_publishing() -> Result<(), String> {
-    println!("⏹️ stop_publishing called");
+    eprintln!("[commands] stop_publishing");
     let _ = ffi::publisher_stop();
     IS_PUBLISHING.store(false, Ordering::SeqCst);
-    println!("⏹️ Publisher stopped");
     Ok(())
 }
 
@@ -273,9 +268,7 @@ pub fn set_send_mode(mode: i32) -> Result<(), String> {
         3 => "USB-Optimized (spin+gap)",
         _ => "UNKNOWN",
     };
-    println!("════════════════════════════════════════════════════════════");
-    println!("🔀 RUST set_send_mode CALLED: {} ({})", mode_name, mode);
-    println!("════════════════════════════════════════════════════════════");
+    eprintln!("[commands] set_send_mode: {} ({})", mode_name, mode);
     ffi::set_send_mode(mode)
 }
 
@@ -354,7 +347,7 @@ pub fn get_stats() -> StatsResponse {
 
 #[tauri::command]
 pub fn reset_stats() -> Result<(), String> {
-    println!("🔄 reset_stats called");
+    eprintln!("[commands] reset_stats");
     ffi::stats_reset();
     PACKETS_SENT.store(0, Ordering::SeqCst);
     BYTES_SENT.store(0, Ordering::SeqCst);
@@ -373,11 +366,8 @@ pub fn get_config() -> SvConfig {
 
 #[tauri::command]
 pub fn set_config(config: SvConfig) -> Result<(), String> {
-    println!("════════════════════════════════════════════════════════════");
-    println!("⚙️  RUST set_config CALLED!");
-    println!("    svID={}, appID={:#X}, rate={}, noASDU={}, channels={}", 
+    eprintln!("[commands] set_config: svID={}, appID={:#X}, rate={}, noASDU={}, channels={}", 
         config.sv_id, config.app_id, config.sample_rate, config.no_asdu, config.channel_count);
-    println!("════════════════════════════════════════════════════════════");
     *CONFIG.lock().unwrap() = config;
     Ok(())
 }
@@ -413,15 +403,7 @@ pub fn get_channels() -> Vec<Channel> {
 #[tauri::command]
 pub fn set_channels(channels: Vec<Channel>) -> Result<(), String> {
     let count = channels.len();
-    println!("╔════════════════════════════════════════════════════════════╗");
-    println!("║  📥 RUST: RECEIVED {} CHANNELS FROM FRONTEND              ", count);
-    println!("╠════════════════════════════════════════════════════════════╣");
-    
-    // Log channel details
-    for (i, ch) in channels.iter().enumerate() {
-        println!("║  [{}] {} ({}) = {}", i, ch.id, ch.channel_type, ch.equation);
-    }
-    println!("╚════════════════════════════════════════════════════════════╝");
+    eprintln!("[commands] set_channels: {} channels received", count);
     
     // Store channels
     *CHANNELS.lock().unwrap() = channels.clone();
@@ -435,7 +417,6 @@ pub fn set_channels(channels: Vec<Channel>) -> Result<(), String> {
     
     ffi::set_equations(&equations_str)?;
     
-    println!("✅ Channels configured in C++ backend");
     Ok(())
 }
 
@@ -540,21 +521,21 @@ pub struct MpPublisherConfig {
 #[tauri::command]
 pub fn mp_add_publisher() -> u32 {
     let id = ffi::mp_add_publisher();
-    println!("[mp] Added publisher {}", id);
+    eprintln!("[commands] mp_add_publisher: id={}", id);
     id
 }
 
 /// Remove a publisher
 #[tauri::command]
 pub fn mp_remove_publisher(id: u32) -> Result<(), String> {
-    println!("[mp] Removing publisher {}", id);
+    eprintln!("[commands] mp_remove_publisher: id={}", id);
     ffi::mp_remove_publisher(id)
 }
 
 /// Remove ALL publishers (reset for new session)
 #[tauri::command]
 pub fn mp_remove_all_publishers() -> Result<(), String> {
-    println!("[mp] Removing all publishers (session reset)");
+    eprintln!("[commands] mp_remove_all_publishers");
     ffi::mp_remove_all_publishers()
 }
 
@@ -567,10 +548,8 @@ pub fn mp_get_publisher_count() -> u32 {
 /// Configure a specific publisher and set its equations
 #[tauri::command]
 pub fn mp_configure_publisher(id: u32, config: MpPublisherConfig) -> Result<(), String> {
-    println!("════════════════════════════════════════════════════════════");
-    println!("[mp] Configure publisher {}: svID={}, appID={:#06X}, rate={}, channels={}",
+    eprintln!("[commands] mp_configure_publisher: id={}, svID={}, appID={:#06X}, rate={}, channels={}",
         id, config.sv_id, config.app_id, config.sample_rate, config.channel_count);
-    println!("════════════════════════════════════════════════════════════");
 
     // Configure publisher
     ffi::mp_configure_publisher(
@@ -606,21 +585,21 @@ pub fn mp_configure_publisher(id: u32, config: MpPublisherConfig) -> Result<(), 
 /// Start all publishers
 #[tauri::command]
 pub fn mp_start_all() -> Result<(), String> {
-    println!("▶️ [mp] Starting all publishers...");
+    eprintln!("[commands] mp_start_all");
     ffi::mp_start_all()
 }
 
 /// Stop all publishers
 #[tauri::command]
 pub fn mp_stop_all() -> Result<(), String> {
-    println!("⏹️ [mp] Stopping all publishers...");
+    eprintln!("[commands] mp_stop_all");
     ffi::mp_stop_all()
 }
 
 /// Full reset: stop + clear ALL backend state (publishers, buffers, stats, settings)
 #[tauri::command]
 pub fn mp_reset_all() -> Result<(), String> {
-    println!("🔄 [mp] FULL RESET — clearing all backend state");
+    eprintln!("[commands] mp_reset_all");
     // Reset Rust-side state too
     IS_PUBLISHING.store(false, Ordering::SeqCst);
     PACKETS_SENT.store(0, Ordering::SeqCst);

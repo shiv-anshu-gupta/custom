@@ -34,6 +34,7 @@ SvPublisherInstance::SvPublisherInstance(uint32_t id)
     , m_state(IDLE)
     , m_config{}
     , m_eqProcessor(50.0, 4800)
+    , m_frameData(nullptr)
     , m_frames(nullptr)
     , m_frameLens(nullptr)
     , m_frameCount(0)
@@ -128,11 +129,6 @@ int SvPublisherInstance::configure(const PublisherConfig& config)
     m_eqProcessor.setSampleRate((uint32_t)m_config.sampleRate);
 
     m_state = CONFIGURED;
-    printf("[publisher-%u] Configured: svID=%s, appID=0x%04X, rate=%llu Hz, "
-           "freq=%.0f Hz, channels=%d, asdu=%d\n",
-           m_id, m_config.svID, m_config.appID,
-           (unsigned long long)m_config.sampleRate,
-           m_config.frequency, m_config.channelCount, m_config.asduCount);
     return 0;
 }
 
@@ -154,7 +150,6 @@ int SvPublisherInstance::setEquations(const char* equations)
         return -1;
     }
 
-    printf("[publisher-%u] Loaded %d channel equations\n", m_id, result);
     return 0;
 }
 
@@ -183,10 +178,6 @@ int SvPublisherInstance::prebuildFrames()
     if (packetsPerSecond > SV_PUB_MAX_PREBUILT_FRAMES)
         packetsPerSecond = SV_PUB_MAX_PREBUILT_FRAMES;
     if (packetsPerSecond < 1) packetsPerSecond = 1;
-
-    printf("[publisher-%u] Building %d frames (1 sec, smpCnt 0-%d, %d ch, %d ASDU)...\n",
-           m_id, packetsPerSecond, packetsPerSecond - 1,
-           m_config.channelCount, m_config.asduCount);
 
     /* Allocate internal buffer */
     if (!allocFrameCache(packetsPerSecond)) {
@@ -236,8 +227,6 @@ int SvPublisherInstance::prebuildFrames()
     }
 
     m_state = READY;
-    printf("[publisher-%u] READY: %d frames, %zu bytes/frame\n",
-           m_id, m_frameCount, m_frameLens[0]);
     return 0;
 }
 
@@ -249,24 +238,26 @@ bool SvPublisherInstance::allocFrameCache(int count)
 {
     freeFrameCache();
 
-    m_frames = new (std::nothrow) uint8_t*[count];
-    if (!m_frames) return false;
+    // Single contiguous allocation for all frames — eliminates heap
+    // fragmentation and TLB misses from 4000+ scattered allocs
+    m_frameData = new (std::nothrow) uint8_t[(size_t)count * SV_MAX_FRAME_SIZE];
+    if (!m_frameData) return false;
 
-    m_frameLens = new (std::nothrow) size_t[count];
-    if (!m_frameLens) {
-        delete[] m_frames; m_frames = nullptr;
+    m_frames = new (std::nothrow) uint8_t*[count];
+    if (!m_frames) {
+        delete[] m_frameData; m_frameData = nullptr;
         return false;
     }
 
-    for (int i = 0; i < count; i++) {
-        m_frames[i] = new (std::nothrow) uint8_t[SV_MAX_FRAME_SIZE];
-        if (!m_frames[i]) {
-            for (int j = 0; j < i; j++) delete[] m_frames[j];
-            delete[] m_frames;   m_frames = nullptr;
-            delete[] m_frameLens; m_frameLens = nullptr;
-            return false;
-        }
+    m_frameLens = new (std::nothrow) size_t[count];
+    if (!m_frameLens) {
+        delete[] m_frameData; m_frameData = nullptr;
+        delete[] m_frames;    m_frames = nullptr;
+        return false;
     }
+
+    for (int i = 0; i < count; i++)
+        m_frames[i] = m_frameData + (size_t)i * SV_MAX_FRAME_SIZE;
 
     m_frameCapacity = count;
     return true;
@@ -274,16 +265,12 @@ bool SvPublisherInstance::allocFrameCache(int count)
 
 void SvPublisherInstance::freeFrameCache()
 {
-    if (m_frames) {
-        for (int i = 0; i < m_frameCapacity; i++)
-            delete[] m_frames[i];
-        delete[] m_frames;
-        m_frames = nullptr;
-    }
-    if (m_frameLens) {
-        delete[] m_frameLens;
-        m_frameLens = nullptr;
-    }
+    delete[] m_frameData;
+    m_frameData = nullptr;
+    delete[] m_frames;
+    m_frames = nullptr;
+    delete[] m_frameLens;
+    m_frameLens = nullptr;
     m_frameCount    = 0;
     m_frameCapacity = 0;
 }

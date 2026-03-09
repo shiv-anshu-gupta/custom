@@ -51,6 +51,20 @@ fn main() {
         .include(&native_dir)   // For source-relative includes
         .include(&include_dir); // For header files
 
+    // Release-mode optimization flags (all platforms)
+    let profile = std::env::var("PROFILE").unwrap_or_default();
+    if profile == "release" {
+        #[cfg(target_os = "windows")]
+        {
+            build.flag("/O2").define("NDEBUG", None);
+        }
+        #[cfg(not(target_os = "windows"))]
+        {
+            build.flag("-O3").define("NDEBUG", None);
+            build.flag("-march=native");
+        }
+    }
+
     // Platform-specific compiler flags
     #[cfg(target_os = "windows")]
     {
@@ -68,7 +82,8 @@ fn main() {
         build
             .flag("-std=c++17")
             .flag("-fPIC")
-            .flag("-pthread");
+            .flag("-pthread")
+            .flag("-funroll-loops");
         // Link against libpcap on Linux
         println!("cargo:rustc-link-lib=pcap");
         println!("cargo:rustc-link-lib=pthread");
