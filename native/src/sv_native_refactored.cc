@@ -249,27 +249,16 @@ static void elevate_thread_priority() {
 #ifdef _WIN32
     timeBeginPeriod(1);
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
-    SetThreadAffinityMask(GetCurrentThread(), 1ULL << 1);
-    printf("[publisher] Thread: TIME_CRITICAL, core 1, timeBeginPeriod(1)\n");
+    printf("[publisher] Thread: TIME_CRITICAL, timeBeginPeriod(1)\n");
 #else
-    /* Linux/macOS: set real-time FIFO scheduling (requires root/CAP_SYS_NICE) */
     struct sched_param param;
-    param.sched_priority = sched_get_priority_max(SCHED_FIFO);
-    if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &param) == 0) {
-        printf("[publisher] Thread: SCHED_FIFO priority %d\n", param.sched_priority);
+    param.sched_priority = 20;
+    if (pthread_setschedparam(pthread_self(), SCHED_RR, &param) == 0) {
+        printf("[publisher] Thread: SCHED_RR priority %d\n", param.sched_priority);
     } else {
-        /* Fallback: try highest normal priority */
-        param.sched_priority = 0;
-        nice(-20);
-        printf("[publisher] Thread: nice(-20) fallback (no root for SCHED_FIFO)\n");
+        nice(-10);
+        printf("[publisher] Thread: nice(-10) fallback\n");
     }
-    /* Pin to core 1 if available */
-#ifdef __linux__
-    cpu_set_t cpuset;
-    CPU_ZERO(&cpuset);
-    CPU_SET(1, &cpuset);
-    pthread_setaffinity_np(pthread_self(), sizeof(cpuset), &cpuset);
-#endif
 #endif
 }
 
@@ -277,24 +266,12 @@ static void restore_thread_priority() {
 #ifdef _WIN32
     timeEndPeriod(1);
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
-    /* Restore full CPU affinity */
-    SYSTEM_INFO si;
-    GetSystemInfo(&si);
-    SetThreadAffinityMask(GetCurrentThread(), (1ULL << si.dwNumberOfProcessors) - 1);
-    printf("[publisher] Thread priority and affinity restored\n");
+    printf("[publisher] Thread priority restored\n");
 #else
     struct sched_param param;
     param.sched_priority = 0;
     pthread_setschedparam(pthread_self(), SCHED_OTHER, &param);
-#ifdef __linux__
-    /* Restore full CPU affinity */
-    cpu_set_t cpuset;
-    CPU_ZERO(&cpuset);
-    long nprocs = sysconf(_SC_NPROCESSORS_ONLN);
-    for (long i = 0; i < nprocs; i++) CPU_SET(i, &cpuset);
-    pthread_setaffinity_np(pthread_self(), sizeof(cpuset), &cpuset);
-#endif
-    printf("[publisher] Thread priority and affinity restored\n");
+    printf("[publisher] Thread priority restored\n");
 #endif
 }
 
@@ -440,14 +417,11 @@ batch_repeat_start:
             }
             npcap_queue_destroy(queue);
             
-            /* QPC spin-wait: paces batches when target < wire speed.
-             * At wire-saturated rates, next_batch falls behind so the
-             * spin exits instantly — zero overhead, max throughput.
-             * _mm_pause() reduces CPU power while spinning. */
+            /* Sleep until next batch is due */
             next_batch += batch_duration;
-            while (std::chrono::high_resolution_clock::now() < next_batch) {
-                spin_pause();
-            }
+            auto sleepUntil = next_batch - std::chrono::high_resolution_clock::now();
+            if (sleepUntil.count() > 0)
+                std::this_thread::sleep_for(sleepUntil);
             
             /* Re-anchor every 200 batches to prevent cumulative drift */
             batch_count++;
@@ -600,8 +574,11 @@ immediate_repeat_start:
         frame_idx++;
         pkt_num++;
         
-        if (pacing == PACING_NONE)
+        if (pacing == PACING_NONE) {
+            if (pkt_num % 1000 == 0)
+                std::this_thread::yield();
             continue;
+        }
         
         /* Absolute target for the NEXT packet */
         auto target = epoch + pkt_num * interval_dur;
@@ -620,39 +597,16 @@ immediate_repeat_start:
                 pkt_num = 0;
             }
 
-            /* USB mode: even when behind, enforce minimum gap between
-             * sends so the USB host controller doesn't batch packets
-             * into the same microframe (125µs). Configurable gap. */
-            if (usbMode) {
-                auto minTarget = now + std::chrono::microseconds(usbGapUs);
-                while (std::chrono::high_resolution_clock::now() < minTarget)
-                    spin_pause();
-            }
+            /* USB mode: enforce minimum gap so USB host controller
+             * doesn't batch packets into same microframe (125µs). */
+            if (usbMode)
+                std::this_thread::sleep_for(std::chrono::microseconds(usbGapUs));
             continue;
         }
         
-        /* Ahead of schedule — pace to exact target */
-        switch (pacing) {
-            case PACING_SLEEP: {
-                auto remaining = std::chrono::duration_cast<
-                    std::chrono::microseconds>(target - now);
-                if (remaining.count() > 80) {
-                    std::this_thread::sleep_for(
-                        remaining - std::chrono::microseconds(80));
-                }
-                while (std::chrono::high_resolution_clock::now() < target) {
-                    spin_pause();
-                }
-                break;
-            }
-            case PACING_SPIN:
-                while (std::chrono::high_resolution_clock::now() < target) {
-                    spin_pause();
-                }
-                break;
-            default:
-                break;
-        }
+        /* Ahead of schedule — sleep until target time.
+         * Epoch-anchored scheduling self-corrects any oversleep. */
+        std::this_thread::sleep_for(target - now);
     }
     
     restore_thread_priority();
